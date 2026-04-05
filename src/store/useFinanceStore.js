@@ -5,12 +5,20 @@ import { buildMockTransactions } from "../data/mockTransactions";
 const defaultFilters = {
   search: "",
   category: "All",
+  day: "All",
   sortBy: "date",
   sortDirection: "desc",
 };
 
 function sortByDate(transactions) {
   return [...transactions].sort((left, right) => left.date.localeCompare(right.date));
+}
+
+function withUpdatedAt(partial) {
+  return {
+    ...partial,
+    lastUpdatedAt: new Date().toISOString(),
+  };
 }
 
 export const useFinanceStore = create(
@@ -22,11 +30,14 @@ export const useFinanceStore = create(
       dateRange: "30d",
       activeView: "dashboard",
       darkMode: false,
+      dashboardMode: "savings",
+      lastUpdatedAt: new Date().toISOString(),
       hydrated: false,
       setHydrated: (hydrated) => set({ hydrated }),
       setRole: (selectedRole) => set({ selectedRole }),
       setDateRange: (dateRange) => set({ dateRange }),
       setActiveView: (activeView) => set({ activeView }),
+      setDashboardMode: (dashboardMode) => set({ dashboardMode }),
       setSearch: (search) =>
         set((state) => ({
           filters: {
@@ -41,11 +52,25 @@ export const useFinanceStore = create(
             category,
           },
         })),
+      setDayFilter: (day) =>
+        set((state) => ({
+          filters: {
+            ...state.filters,
+            day,
+          },
+        })),
       clearCategoryFilter: () =>
         set((state) => ({
           filters: {
             ...state.filters,
             category: "All",
+          },
+        })),
+      clearDayFilter: () =>
+        set((state) => ({
+          filters: {
+            ...state.filters,
+            day: "All",
           },
         })),
       toggleSort: (sortBy) =>
@@ -62,21 +87,27 @@ export const useFinanceStore = create(
       clearFilters: () => set({ filters: defaultFilters }),
       toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
       addTransaction: (transaction) =>
-        set((state) => ({
-          transactions: sortByDate([...state.transactions, transaction]),
-        })),
+        set((state) =>
+          withUpdatedAt({
+            transactions: sortByDate([...state.transactions, transaction]),
+          }),
+        ),
       updateTransaction: (id, updates) =>
-        set((state) => ({
-          transactions: sortByDate(
-            state.transactions.map((transaction) =>
-              transaction.id === id ? { ...transaction, ...updates } : transaction,
+        set((state) =>
+          withUpdatedAt({
+            transactions: sortByDate(
+              state.transactions.map((transaction) =>
+                transaction.id === id ? { ...transaction, ...updates } : transaction,
+              ),
             ),
-          ),
-        })),
+          }),
+        ),
       deleteTransaction: (id) =>
-        set((state) => ({
-          transactions: state.transactions.filter((transaction) => transaction.id !== id),
-        })),
+        set((state) =>
+          withUpdatedAt({
+            transactions: state.transactions.filter((transaction) => transaction.id !== id),
+          }),
+        ),
     }),
     {
       name: "northstar-finance-state",
@@ -88,6 +119,8 @@ export const useFinanceStore = create(
         dateRange: state.dateRange,
         activeView: state.activeView,
         darkMode: state.darkMode,
+        dashboardMode: state.dashboardMode,
+        lastUpdatedAt: state.lastUpdatedAt,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHydrated(true);

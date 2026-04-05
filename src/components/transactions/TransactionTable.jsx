@@ -40,7 +40,7 @@ function ActionButtons({ canManage, onEdit, onDelete, reason }) {
   }
 
   return (
-    <div className="flex items-center justify-end gap-2">
+    <div className="flex items-center justify-end gap-2 transition md:opacity-0 md:group-hover:opacity-100">
       <button
         type="button"
         onClick={onEdit}
@@ -70,9 +70,9 @@ export function TransactionTable({
 }) {
   return (
     <>
-      <div className="hidden overflow-hidden rounded-[24px] border border-line/80 md:block">
+      <div className="hidden max-h-[68vh] overflow-auto rounded-[24px] border border-line/80 md:block">
         <table className="min-w-full divide-y divide-line/80">
-          <thead className="bg-surface-strong/80">
+          <thead className="sticky top-0 z-10 bg-surface-strong/95 backdrop-blur">
             <tr>
               {[
                 { id: "date", label: "Date" },
@@ -97,10 +97,12 @@ export function TransactionTable({
           </thead>
           <tbody className="divide-y divide-line/70 bg-surface/75">
             {transactions.map((transaction) => {
-              const badge = CATEGORY_META[transaction.category]?.badge ?? "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+              const badge =
+                CATEGORY_META[transaction.category]?.badge ??
+                "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
 
               return (
-                <tr key={transaction.id} className="transition hover:bg-surface-strong/80">
+                <tr key={transaction.id} className="group transition hover:bg-surface-strong/90">
                   <td className="whitespace-nowrap px-4 py-4 text-sm font-medium text-ink">
                     {formatLongDate(transaction.date)}
                   </td>
@@ -136,10 +138,12 @@ export function TransactionTable({
 
       <div className="grid gap-3 md:hidden">
         {transactions.map((transaction) => {
-          const badge = CATEGORY_META[transaction.category]?.badge ?? "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+          const badge =
+            CATEGORY_META[transaction.category]?.badge ??
+            "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
 
           return (
-            <div key={transaction.id} className="rounded-[24px] border border-line/80 bg-surface/80 p-4">
+            <div key={transaction.id} className="rounded-[24px] border border-line/80 bg-surface/80 p-4 transition hover:-translate-y-0.5 hover:shadow-panel">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-sm font-semibold text-ink">{transaction.description}</p>
@@ -175,3 +179,4 @@ export function TransactionTable({
     </>
   );
 }
+

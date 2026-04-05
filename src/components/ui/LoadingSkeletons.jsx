@@ -7,6 +7,16 @@ function Block({ className }) {
 export function DashboardSkeleton() {
   return (
     <div className="space-y-4 animate-fade-up">
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+        {[1, 2].map((item) => (
+          <Surface key={item} className="space-y-4 px-5 py-5">
+            <Block className="h-5 w-32" />
+            <Block className="h-16 w-2/3" />
+            <Block className="h-24 w-full" />
+            <Block className="h-24 w-full" />
+          </Surface>
+        ))}
+      </div>
       <div className="grid gap-4 xl:grid-cols-3">
         {[1, 2, 3].map((item) => (
           <Surface key={item} className="space-y-4 px-5 py-5">
@@ -16,7 +26,7 @@ export function DashboardSkeleton() {
           </Surface>
         ))}
       </div>
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.7fr)_minmax(320px,1fr)]">
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(340px,1fr)]">
         <Surface className="space-y-4 px-5 py-5">
           <Block className="h-5 w-48" />
           <Block className="h-[320px] w-full" />
@@ -38,6 +48,11 @@ export function TransactionsSkeleton() {
           <Block className="h-12 w-72" />
           <Block className="h-12 w-32" />
           <Block className="h-12 w-32" />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Block key={index} className="h-10 w-28" />
+          ))}
         </div>
       </Surface>
       <Surface className="space-y-3 px-5 py-5">

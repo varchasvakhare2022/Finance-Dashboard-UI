@@ -1,7 +1,29 @@
 import { ArrowRight } from "lucide-react";
-import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { formatCurrency, formatPercent } from "../../utils/finance";
 import { Surface } from "../ui/Surface";
+
+function BreakdownTooltip({ active, payload }) {
+  if (!active || !payload?.length) {
+    return null;
+  }
+
+  const item = payload[0].payload;
+
+  return (
+    <div className="rounded-2xl border border-line/80 bg-surface px-4 py-3 shadow-lg backdrop-blur">
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">{item.category}</p>
+      <p className="mt-2 text-base font-bold text-ink">{formatCurrency(item.value)}</p>
+      <div className="mt-2 flex items-center gap-2 text-sm text-muted">
+        <span>{formatPercent(item.share * 100)} of expenses</span>
+        <span>
+          {item.change >= 0 ? "+" : ""}
+          {formatPercent(item.change)} vs previous range
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export function CategoryBreakdown({ categories, selectedCategory, onSelectCategory }) {
   if (!categories.length) {
@@ -26,7 +48,7 @@ export function CategoryBreakdown({ categories, selectedCategory, onSelectCatego
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted">Category mix</p>
         <h3 className="font-display text-2xl font-bold text-ink">Where the money went</h3>
         <p className="text-sm leading-6 text-muted">
-          Click any category to jump into the transactions ledger with that filter applied.
+          Click the chart or any row to inspect the category in a drill-down modal.
         </p>
       </div>
 
@@ -34,6 +56,7 @@ export function CategoryBreakdown({ categories, selectedCategory, onSelectCatego
         <div className="h-[220px] w-full lg:h-[180px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
+              <Tooltip content={<BreakdownTooltip />} />
               <Pie
                 data={categories}
                 dataKey="value"
@@ -41,9 +64,10 @@ export function CategoryBreakdown({ categories, selectedCategory, onSelectCatego
                 innerRadius={56}
                 outerRadius={80}
                 paddingAngle={4}
+                onClick={(entry) => onSelectCategory(entry.category)}
               >
                 {categories.map((entry) => (
-                  <Cell key={entry.category} fill={entry.color} />
+                  <Cell key={entry.category} fill={entry.color} style={{ cursor: "pointer" }} />
                 ))}
               </Pie>
             </PieChart>

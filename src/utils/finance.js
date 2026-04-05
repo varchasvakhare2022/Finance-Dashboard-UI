@@ -9,6 +9,11 @@ export const ROLE_OPTIONS = [
   { label: "Admin", value: "admin" },
 ];
 
+export const DASHBOARD_MODE_OPTIONS = [
+  { label: "Savings Focus", value: "savings" },
+  { label: "Spending Focus", value: "spending" },
+];
+
 export const CATEGORY_META = {
   Salary: {
     dot: "#0f766e",
@@ -69,6 +74,10 @@ const percentFormatter = new Intl.NumberFormat("en-IN", {
   maximumFractionDigits: 1,
 });
 
+const ratioFormatter = new Intl.NumberFormat("en-IN", {
+  maximumFractionDigits: 1,
+});
+
 const fullDateFormatter = new Intl.DateTimeFormat("en-IN", {
   day: "2-digit",
   month: "short",
@@ -85,8 +94,20 @@ const monthFormatter = new Intl.DateTimeFormat("en-IN", {
   year: "numeric",
 });
 
+function average(values) {
+  if (!values.length) {
+    return 0;
+  }
+
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
 export function cn(...classes) {
   return classes.filter(Boolean).join(" ");
+}
+
+export function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
 }
 
 export function createId() {
@@ -104,6 +125,10 @@ export function formatCurrency(value, compact = false) {
 
 export function formatPercent(value) {
   return `${percentFormatter.format(Number.isFinite(value) ? value : 0)}%`;
+}
+
+export function formatFactor(value) {
+  return `${ratioFormatter.format(Number.isFinite(value) ? value : 0)}x`;
 }
 
 export function formatSignedCurrency(value, compact = false) {
@@ -147,6 +172,31 @@ export function formatDayMonth(value) {
 
 export function formatMonth(value) {
   return monthFormatter.format(parseDate(value));
+}
+
+export function formatRelativeTime(value, referenceDate = new Date()) {
+  if (!value) {
+    return "just now";
+  }
+
+  const diffMs = referenceDate.getTime() - new Date(value).getTime();
+  const diffMinutes = Math.max(0, Math.floor(diffMs / 60000));
+
+  if (diffMinutes < 1) {
+    return "just now";
+  }
+
+  if (diffMinutes < 60) {
+    return `${diffMinutes} min${diffMinutes === 1 ? "" : "s"} ago`;
+  }
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) {
+    return `${diffHours} hr${diffHours === 1 ? "" : "s"} ago`;
+  }
+
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
 }
 
 export function getRangeDays(range) {
@@ -235,6 +285,10 @@ export function filterAndSortTransactions(
     next = next.filter((transaction) => transaction.category === filters.category);
   }
 
+  if (filters.day && filters.day !== "All") {
+    next = next.filter((transaction) => transaction.date === filters.day);
+  }
+
   return sortTransactions(next, filters.sortBy, filters.sortDirection);
 }
 
@@ -252,12 +306,22 @@ export function getTypeTotal(transactions, type) {
     .reduce((sum, transaction) => sum + transaction.amount, 0);
 }
 
-function getPercentChange(current, previous) {
+export function getPercentChange(current, previous) {
   if (previous === 0) {
     return current === 0 ? 0 : 100;
   }
 
   return ((current - previous) / Math.abs(previous)) * 100;
+}
+
+function buildSeriesPoint(dateKey, label, value, previousValue) {
+  return {
+    date: dateKey,
+    label,
+    value,
+    delta: value - previousValue,
+    changePercent: getPercentChange(value, previousValue),
+  };
 }
 
 function describeTrend(current, previous, kind) {
@@ -304,12 +368,9 @@ export function getDailySeries(transactions, range, metric, referenceDate = new 
     let runningBalance = openingBalance;
     for (let cursor = start; cursor <= end; cursor = addDays(cursor, 1)) {
       const key = toDateKey(cursor);
+      const previousValue = days.length ? days[days.length - 1].value : openingBalance;
       runningBalance += netByDay.get(key) ?? 0;
-      days.push({
-        date: key,
-        label: formatDayMonth(cursor),
-        value: runningBalance,
-      });
+      days.push(buildSeriesPoint(key, formatDayMonth(cursor), runningBalance, previousValue));
     }
 
     return days;
@@ -336,11 +397,9 @@ export function getDailySeries(transactions, range, metric, referenceDate = new 
 
   for (let cursor = start; cursor <= end; cursor = addDays(cursor, 1)) {
     const key = toDateKey(cursor);
-    days.push({
-      date: key,
-      label: formatDayMonth(cursor),
-      value: totalsByDay.get(key) ?? 0,
-    });
+    const value = totalsByDay.get(key) ?? 0;
+    const previousValue = days.length ? days[days.length - 1].value : 0;
+    days.push(buildSeriesPoint(key, formatDayMonth(cursor), value, previousValue));
   }
 
   return days;
@@ -405,25 +464,45 @@ export function getOverviewMetrics(transactions, range, referenceDate = new Date
 }
 
 export function getCategoryBreakdown(transactions, range, referenceDate = new Date()) {
-  const expenses = filterTransactionsByDateRange(transactions, range, referenceDate).filter(
-    (transaction) => transaction.type === "expense",
-  );
+  const currentWindow = getRangeWindow(range, referenceDate);
+  const previousWindow = getPreviousWindow(range, referenceDate);
 
-  const totals = new Map();
-  expenses.forEach((transaction) => {
-    totals.set(
+  const currentExpenses = filterTransactionsByWindow(
+    transactions,
+    currentWindow.start,
+    currentWindow.end,
+  ).filter((transaction) => transaction.type === "expense");
+  const previousExpenses = filterTransactionsByWindow(
+    transactions,
+    previousWindow.start,
+    previousWindow.end,
+  ).filter((transaction) => transaction.type === "expense");
+
+  const currentTotals = new Map();
+  const previousTotals = new Map();
+
+  currentExpenses.forEach((transaction) => {
+    currentTotals.set(
       transaction.category,
-      (totals.get(transaction.category) ?? 0) + transaction.amount,
+      (currentTotals.get(transaction.category) ?? 0) + transaction.amount,
     );
   });
 
-  const total = Array.from(totals.values()).reduce((sum, value) => sum + value, 0);
+  previousExpenses.forEach((transaction) => {
+    previousTotals.set(
+      transaction.category,
+      (previousTotals.get(transaction.category) ?? 0) + transaction.amount,
+    );
+  });
 
-  return Array.from(totals.entries())
+  const total = Array.from(currentTotals.values()).reduce((sum, value) => sum + value, 0);
+
+  return Array.from(currentTotals.entries())
     .map(([category, value]) => ({
       category,
       value,
       share: total === 0 ? 0 : value / total,
+      change: getPercentChange(value, previousTotals.get(category) ?? 0),
       color: CATEGORY_META[category]?.dot ?? "#64748b",
     }))
     .sort((left, right) => right.value - left.value);
@@ -441,7 +520,17 @@ export function getMonthlyComparison(transactions, referenceDate = new Date()) {
     currentDate.getMonth() - 1,
     1,
   );
-  const previousMonthEnd = addDays(currentMonthStart, -1);
+  const currentDaysElapsed = currentDate.getDate();
+  const previousMonthLength = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    0,
+  ).getDate();
+  const previousComparisonEnd = new Date(
+    previousMonthStart.getFullYear(),
+    previousMonthStart.getMonth(),
+    Math.min(currentDaysElapsed, previousMonthLength),
+  );
 
   const currentMonthTransactions = filterTransactionsByWindow(
     transactions,
@@ -451,7 +540,7 @@ export function getMonthlyComparison(transactions, referenceDate = new Date()) {
   const previousMonthTransactions = filterTransactionsByWindow(
     transactions,
     previousMonthStart,
-    previousMonthEnd,
+    previousComparisonEnd,
   );
 
   const currentIncome = getTypeTotal(currentMonthTransactions, "income");
@@ -460,8 +549,8 @@ export function getMonthlyComparison(transactions, referenceDate = new Date()) {
   const previousExpenses = getTypeTotal(previousMonthTransactions, "expense");
 
   return {
-    currentLabel: formatMonth(currentDate),
-    previousLabel: formatMonth(previousMonthStart),
+    currentLabel: `${formatMonth(currentDate)} MTD`,
+    previousLabel: `${formatMonth(previousMonthStart)} MTD`,
     current: {
       income: currentIncome,
       expenses: currentExpenses,
@@ -482,8 +571,244 @@ export function getMonthlyComparison(transactions, referenceDate = new Date()) {
   };
 }
 
-export function getInsights(transactions, referenceDate = new Date()) {
+export function getHealthScore(transactions, range, referenceDate = new Date()) {
+  const currentTransactions = filterTransactionsByDateRange(transactions, range, referenceDate);
+  const income = getTypeTotal(currentTransactions, "income");
+  const expenses = getTypeTotal(currentTransactions, "expense");
+  const net = income - expenses;
+  const savingsRate = income === 0 ? 0 : (net / income) * 100;
+  const expenseCoverage = expenses === 0 ? (income > 0 ? 2 : 0) : income / expenses;
+  const expenseSeries = getDailySeries(transactions, range, "expense", referenceDate);
+  const nonZeroExpenseDays = expenseSeries.filter((item) => item.value > 0);
+  const averageExpenseDay = average(nonZeroExpenseDays.map((item) => item.value));
+  const spikes = nonZeroExpenseDays
+    .map((item) => ({
+      ...item,
+      intensity: averageExpenseDay === 0 ? 0 : item.value / averageExpenseDay,
+    }))
+    .filter((item) => item.intensity >= 2.3)
+    .sort((left, right) => right.intensity - left.intensity);
+
+  const ratioScore = clamp(Math.round((Math.min(expenseCoverage, 2) / 2) * 40), 0, 40);
+  const savingsScore = clamp(Math.round((Math.min(Math.max(savingsRate, 0), 25) / 25) * 35), 0, 35);
+  const spikePenalty = spikes.slice(0, 3).reduce((sum, item) => sum + Math.min(8, (item.intensity - 2) * 6), 0);
+  const stabilityScore = clamp(Math.round(25 - spikePenalty), 0, 25);
+  const score = clamp(Math.round(ratioScore + savingsScore + stabilityScore), 0, 100);
+
+  let label = "Critical";
+  let tone = "critical";
+  let summary = "Expense pressure is crowding out savings and weakening resilience.";
+
+  if (score >= 78) {
+    label = "Good";
+    tone = "positive";
+    summary = "Income coverage and savings discipline are keeping the dashboard in a healthy zone.";
+  } else if (score >= 55) {
+    label = "Warning";
+    tone = "warning";
+    summary = "The overall picture is workable, but a few spending behaviors need closer attention.";
+  }
+
+  const currentBalance = getDailySeries(transactions, range, "balance", referenceDate).at(-1)?.value ?? 0;
+
+  return {
+    score,
+    label,
+    tone,
+    summary,
+    savingsRate,
+    expenseCoverage,
+    spikes,
+    currentBalance,
+    factors: [
+      {
+        id: "coverage",
+        title: "Income coverage",
+        value: formatFactor(expenseCoverage),
+        detail: "How comfortably income absorbs expense run rate.",
+        tone: expenseCoverage >= 1.2 ? "positive" : "warning",
+      },
+      {
+        id: "savings",
+        title: "Savings rate",
+        value: formatPercent(savingsRate),
+        detail:
+          savingsRate >= 20
+            ? "Above the recommended 20% savings threshold."
+            : "Below the recommended 20% savings threshold.",
+        tone: savingsRate >= 20 ? "positive" : "warning",
+      },
+      {
+        id: "stability",
+        title: "Spending spikes",
+        value: spikes.length ? `${spikes.length} flagged` : "Stable",
+        detail: spikes.length
+          ? "Lumpy expense days are pulling the score down."
+          : "No unusual spikes were detected in this window.",
+        tone: spikes.length ? "warning" : "positive",
+      },
+    ],
+    recommendation:
+      savingsRate < 20
+        ? "Push savings above 20% to restore healthy monthly slack."
+        : spikes.length
+          ? "Smooth out large spend days to reduce volatility in the score."
+          : "The current cash profile is stable enough to keep investing in longer-term goals.",
+  };
+}
+
+export function getAlertFeed(transactions, range, referenceDate = new Date()) {
+  const currentTransactions = filterTransactionsByDateRange(transactions, range, referenceDate);
+  const currentExpenses = getTypeTotal(currentTransactions, "expense");
+  const health = getHealthScore(transactions, range, referenceDate);
   const comparison = getMonthlyComparison(transactions, referenceDate);
+  const breakdown = getCategoryBreakdown(transactions, range, referenceDate);
+  const topCategory = breakdown[0];
+  const alerts = [];
+
+  if (health.spikes.length) {
+    const spike = health.spikes[0];
+    alerts.push({
+      id: "spike",
+      tone: "warning",
+      icon: "triangle-alert",
+      title: "Unusual spending spike detected",
+      detail: `${formatLongDate(spike.date)} recorded ${formatCurrency(spike.value)}, or ${formatPercent((spike.intensity - 1) * 100)} above a typical expense day.`,
+      actionLabel: "Review day",
+      target: { type: "day", value: spike.date },
+    });
+  }
+
+  if (health.savingsRate < 20) {
+    alerts.push({
+      id: "savings-rate",
+      tone: "warning",
+      icon: "piggy-bank",
+      title: "You are saving less than recommended",
+      detail: `Savings rate is ${formatPercent(health.savingsRate)} against the recommended 20% benchmark.`,
+      actionLabel: "Review spending",
+      target: { type: "view", value: "insights" },
+    });
+  }
+
+  if (comparison.changes.expenses > 14) {
+    alerts.push({
+      id: "expense-velocity",
+      tone: "critical",
+      icon: "activity",
+      title: "Expense run-rate is accelerating",
+      detail: `Spending is ${formatPercent(comparison.changes.expenses)} above the same point last month.`,
+      actionLabel: "Open insights",
+      target: { type: "view", value: "insights" },
+    });
+  }
+
+  if (topCategory && topCategory.share >= 0.3) {
+    alerts.push({
+      id: "category-concentration",
+      tone: "warning",
+      icon: "chart-pie",
+      title: `${topCategory.category} is dominating spend`,
+      detail: `${topCategory.category} accounts for ${formatPercent(topCategory.share * 100)} of current expenses.`,
+      actionLabel: "Inspect category",
+      target: { type: "category", value: topCategory.category },
+    });
+  }
+
+  const reserveThreshold = Math.max(100000, currentExpenses * 1.3);
+  if (health.currentBalance < reserveThreshold) {
+    alerts.push({
+      id: "balance-threshold",
+      tone: "critical",
+      icon: "wallet",
+      title: "Balance dropped below comfort threshold",
+      detail: `Current balance is ${formatCurrency(health.currentBalance)} against a comfort threshold of ${formatCurrency(reserveThreshold)}.`,
+      actionLabel: "Review ledger",
+      target: { type: "view", value: "transactions" },
+    });
+  }
+
+  if (!alerts.length) {
+    alerts.push({
+      id: "all-clear",
+      tone: "positive",
+      icon: "shield-check",
+      title: "Cash position looks stable",
+      detail: "No balance stress or unusual spending spikes were detected in the selected range.",
+      actionLabel: "Open insights",
+      target: { type: "view", value: "insights" },
+    });
+  }
+
+  const severity = {
+    critical: 3,
+    warning: 2,
+    positive: 1,
+  };
+
+  return alerts
+    .sort((left, right) => severity[right.tone] - severity[left.tone])
+    .slice(0, 3);
+}
+
+export function getCategoryDrilldown(
+  transactions,
+  range,
+  category,
+  referenceDate = new Date(),
+) {
+  const currentWindow = getRangeWindow(range, referenceDate);
+  const previousWindow = getPreviousWindow(range, referenceDate);
+  const currentTransactions = filterTransactionsByWindow(
+    transactions,
+    currentWindow.start,
+    currentWindow.end,
+  ).filter((transaction) => transaction.category === category);
+  const previousTransactions = filterTransactionsByWindow(
+    transactions,
+    previousWindow.start,
+    previousWindow.end,
+  ).filter((transaction) => transaction.category === category);
+
+  const sortedTransactions = sortTransactions(currentTransactions, "date", "desc");
+  const total = sortedTransactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+  const previousTotal = previousTransactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+  const type = sortedTransactions[0]?.type ?? "expense";
+  const peerTotal = filterTransactionsByWindow(transactions, currentWindow.start, currentWindow.end)
+    .filter((transaction) => transaction.type === type)
+    .reduce((sum, transaction) => sum + transaction.amount, 0);
+
+  return {
+    category,
+    type,
+    transactions: sortedTransactions,
+    total,
+    count: sortedTransactions.length,
+    average: sortedTransactions.length ? total / sortedTransactions.length : 0,
+    share: peerTotal === 0 ? 0 : total / peerTotal,
+    change: getPercentChange(total, previousTotal),
+    largest: [...sortedTransactions].sort((left, right) => right.amount - left.amount)[0],
+    latest: sortedTransactions[0],
+  };
+}
+
+export function getInsights(
+  transactions,
+  range = "30d",
+  dashboardMode = "savings",
+  referenceDate = new Date(),
+) {
+  const comparison = getMonthlyComparison(transactions, referenceDate);
+  const rangeBreakdown = getCategoryBreakdown(transactions, range, referenceDate);
+  const health = getHealthScore(transactions, range, referenceDate);
+  const alerts = getAlertFeed(transactions, range, referenceDate);
+  const topCategory = rangeBreakdown[0] ?? {
+    category: "No spending",
+    value: 0,
+    share: 0,
+    change: 0,
+  };
+  const foodCategory = rangeBreakdown.find((item) => item.category === "Food");
 
   const currentExpenseMap = new Map();
   const previousExpenseMap = new Map();
@@ -504,89 +829,70 @@ export function getInsights(transactions, referenceDate = new Date()) {
       );
     });
 
-  const allCategories = [...new Set([...currentExpenseMap.keys(), ...previousExpenseMap.keys()])];
-  const categoryDiffs = allCategories
-    .map((category) => {
-      const current = currentExpenseMap.get(category) ?? 0;
-      const previous = previousExpenseMap.get(category) ?? 0;
-      return {
-        category,
-        current,
-        previous,
-        change: getPercentChange(current, previous),
-      };
-    })
+  const categoryDiffs = [...new Set([...currentExpenseMap.keys(), ...previousExpenseMap.keys()])]
+    .map((category) => ({
+      category,
+      current: currentExpenseMap.get(category) ?? 0,
+      previous: previousExpenseMap.get(category) ?? 0,
+      change: getPercentChange(
+        currentExpenseMap.get(category) ?? 0,
+        previousExpenseMap.get(category) ?? 0,
+      ),
+    }))
     .sort((left, right) => right.current - left.current);
 
-  const highestSpend = categoryDiffs[0] ?? {
-    category: "No spending",
-    current: 0,
-    previous: 0,
-    change: 0,
-  };
-  const notableIncrease =
-    [...categoryDiffs]
-      .filter((item) => item.current > 0)
-      .sort((left, right) => right.change - left.change)[0] ?? highestSpend;
+  const heroTitle =
+    dashboardMode === "spending"
+      ? `${topCategory.category} is the largest pressure point right now`
+      : health.savingsRate >= 20
+        ? "Savings momentum is holding above the healthy zone"
+        : "Savings discipline needs attention before spend grows further";
 
-  const weekendSpendCurrent = comparison.currentTransactions
-    .filter((transaction) => transaction.type === "expense" && isWeekend(transaction.date))
-    .reduce((sum, transaction) => sum + transaction.amount, 0);
-  const weekendSpendPrevious = comparison.previousTransactions
-    .filter((transaction) => transaction.type === "expense" && isWeekend(transaction.date))
-    .reduce((sum, transaction) => sum + transaction.amount, 0);
-
-  const topExpenseShare =
-    comparison.current.expenses === 0
-      ? 0
-      : (highestSpend.current / comparison.current.expenses) * 100;
-
-  const savingsRate =
-    comparison.current.income === 0
-      ? 0
-      : (comparison.current.net / comparison.current.income) * 100;
+  const heroText =
+    dashboardMode === "spending"
+      ? `${topCategory.category} represents ${formatPercent(topCategory.share * 100)} of expense outflow in the selected range, while overall spend is ${comparison.changes.expenses >= 0 ? "up" : "down"} ${formatPercent(Math.abs(comparison.changes.expenses))} versus the same point last month.`
+      : `Financial health is ${health.score}/100 with a ${formatPercent(health.savingsRate)} savings rate. ${health.recommendation}`;
 
   return {
-    heroTitle:
-      comparison.current.net >= 0
-        ? "Cash flow stayed comfortably ahead of spend"
-        : "Expenses briefly outpaced income this month",
-    heroText:
-      comparison.current.net >= 0
-        ? `${formatCurrency(comparison.current.net)} net retained in ${comparison.currentLabel}, keeping savings rate at ${formatPercent(Math.abs(savingsRate))}.`
-        : `${formatCurrency(Math.abs(comparison.current.net))} more went out than came in during ${comparison.currentLabel}.`,
+    heroTitle,
+    heroText,
+    health,
+    alerts,
     cards: [
       {
-        id: "highest-spend",
-        icon: "landmark",
-        title: "Highest spending category",
-        value: highestSpend.category,
-        detail: `${formatCurrency(highestSpend.current)} spent, representing ${formatPercent(topExpenseShare)} of this month's outflow.`,
+        id: "expenses-change",
+        icon: comparison.changes.expenses >= 0 ? "trending-up" : "trending-down",
+        title: "Spending vs last month",
+        value: `${comparison.changes.expenses >= 0 ? "+" : ""}${formatPercent(comparison.changes.expenses)}`,
+        detail: `Spending ${comparison.changes.expenses >= 0 ? "increased" : "decreased"} compared to the same point last month.`,
+        tone: comparison.changes.expenses >= 0 ? "rose" : "emerald",
+      },
+      {
+        id: "category-share",
+        icon: "chart-pie",
+        title: "Category concentration",
+        value: `${topCategory.category} ${formatPercent(topCategory.share * 100)}`,
+        detail: `${topCategory.category} is ${formatPercent(topCategory.share * 100)} of total expenses in the selected range.`,
         tone: "violet",
       },
       {
-        id: "monthly-shift",
-        icon: comparison.changes.expenses > 0 ? "trending-up" : "trending-down",
-        title: "Monthly comparison",
-        value: `${comparison.changes.expenses > 0 ? "+" : ""}${formatPercent(comparison.changes.expenses)}`,
-        detail: `Expenses ${comparison.changes.expenses > 0 ? "increased" : "decreased"} versus ${comparison.previousLabel}.`,
-        tone: comparison.changes.expenses > 0 ? "rose" : "emerald",
+        id: "savings-target",
+        icon: health.savingsRate >= 20 ? "shield-check" : "piggy-bank",
+        title: "Savings target",
+        value: formatPercent(health.savingsRate),
+        detail:
+          health.savingsRate >= 20
+            ? "Savings is running above the recommended 20% threshold."
+            : `You are saving ${formatPercent(20 - health.savingsRate)} below the recommended 20% threshold.`,
+        tone: health.savingsRate >= 20 ? "emerald" : "amber",
       },
       {
-        id: "smart-observation",
-        icon: "sparkles",
-        title: "Smart observation",
-        value: notableIncrease.category,
-        detail: `${notableIncrease.category} spending ${notableIncrease.change >= 0 ? "rose" : "fell"} ${formatPercent(Math.abs(notableIncrease.change))} vs last month.`,
-        tone: "amber",
-      },
-      {
-        id: "weekend-pulse",
-        icon: "calendar",
-        title: "Weekend pulse",
-        value: formatCurrency(weekendSpendCurrent),
-        detail: `Weekend spending ${weekendSpendCurrent >= weekendSpendPrevious ? "ran hotter" : "cooled down"} by ${formatPercent(Math.abs(getPercentChange(weekendSpendCurrent, weekendSpendPrevious)))}.`,
-        tone: "sky",
+        id: "health-score",
+        icon: "activity",
+        title: "Financial health score",
+        value: `${health.score}/100`,
+        detail: `${health.label} status based on coverage, savings, and spending stability.`,
+        tone: health.tone === "positive" ? "emerald" : health.tone === "warning" ? "amber" : "rose",
       },
     ],
     monthlyBars: [
@@ -611,13 +917,13 @@ export function getInsights(transactions, referenceDate = new Date()) {
     ],
     topCategories: categoryDiffs.slice(0, 4),
     observations: [
-      `${highestSpend.category} remains the largest cost center in ${comparison.currentLabel}.`,
-      comparison.current.net >= 0
-        ? "Recurring income is still more than enough to absorb fixed costs."
-        : "The current spend pace should be moderated to protect monthly runway.",
-      weekendSpendCurrent > weekendSpendPrevious
-        ? "Weekend discretionary spend is worth watching if you want to tighten savings."
-        : "Weekend spending is improving and leaving more room for savings.",
+      `Spending changed ${comparison.changes.expenses >= 0 ? "up" : "down"} ${formatPercent(Math.abs(comparison.changes.expenses))} compared to last month.`,
+      foodCategory
+        ? `Food category is ${formatPercent(foodCategory.share * 100)} of total expenses in the selected range.`
+        : `${topCategory.category} is the single largest category at ${formatPercent(topCategory.share * 100)} of expenses.`,
+      health.savingsRate >= 20
+        ? `Savings rate is holding above the recommended 20% floor at ${formatPercent(health.savingsRate)}.`
+        : `You are saving less than recommended at ${formatPercent(health.savingsRate)} versus the 20% goal.`,
     ],
   };
 }

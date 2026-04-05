@@ -1,4 +1,4 @@
-import { startTransition, useDeferredValue, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { Download, Plus, Search, SlidersHorizontal, X } from "lucide-react";
 import { EmptyState } from "../ui/EmptyState";
 import { TransactionsSkeleton } from "../ui/LoadingSkeletons";
@@ -11,6 +11,7 @@ import {
   cn,
   filterAndSortTransactions,
   filterTransactionsByDateRange,
+  formatDayMonth,
   formatSignedCurrency,
   getCategories,
   getNetTotal,
@@ -23,7 +24,9 @@ export function TransactionsView({ isLoading }) {
   const selectedRole = useFinanceStore((state) => state.selectedRole);
   const setSearch = useFinanceStore((state) => state.setSearch);
   const setCategoryFilter = useFinanceStore((state) => state.setCategoryFilter);
+  const setDayFilter = useFinanceStore((state) => state.setDayFilter);
   const clearCategoryFilter = useFinanceStore((state) => state.clearCategoryFilter);
+  const clearDayFilter = useFinanceStore((state) => state.clearDayFilter);
   const toggleSort = useFinanceStore((state) => state.toggleSort);
   const clearFilters = useFinanceStore((state) => state.clearFilters);
   const addTransaction = useFinanceStore((state) => state.addTransaction);
@@ -32,8 +35,21 @@ export function TransactionsView({ isLoading }) {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
-  const deferredSearch = useDeferredValue(filters.search);
-  const visibleFilters = { ...filters, search: deferredSearch };
+  const [searchInput, setSearchInput] = useState(filters.search);
+
+  useEffect(() => {
+    setSearchInput(filters.search);
+  }, [filters.search]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (searchInput !== filters.search) {
+        setSearch(searchInput);
+      }
+    }, 180);
+
+    return () => window.clearTimeout(timer);
+  }, [filters.search, searchInput, setSearch]);
 
   if (isLoading) {
     return <TransactionsSkeleton />;
@@ -41,7 +57,7 @@ export function TransactionsView({ isLoading }) {
 
   const rangeTransactions = filterTransactionsByDateRange(transactions, dateRange);
   const categories = getCategories(rangeTransactions.length ? rangeTransactions : transactions);
-  const filteredTransactions = filterAndSortTransactions(transactions, visibleFilters, dateRange);
+  const filteredTransactions = filterAndSortTransactions(transactions, filters, dateRange);
   const canManage = selectedRole === "admin";
   const visibleNet = getNetTotal(filteredTransactions);
 
@@ -105,6 +121,11 @@ export function TransactionsView({ isLoading }) {
     URL.revokeObjectURL(url);
   };
 
+  const resetFilters = () => {
+    clearFilters();
+    setSearchInput("");
+  };
+
   return (
     <div className="space-y-4">
       <Surface className="space-y-4 px-5 py-5 animate-fade-up">
@@ -126,30 +147,11 @@ export function TransactionsView({ isLoading }) {
               <Download className="h-4 w-4" />
               Export CSV
             </button>
-
-            {canManage ? (
-              <button
-                type="button"
-                onClick={openCreate}
-                className="inline-flex items-center gap-2 rounded-2xl bg-ink px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 dark:bg-white dark:text-slate-900"
-              >
-                <Plus className="h-4 w-4" />
-                Add Transaction
-              </button>
-            ) : (
-              <Tooltip label="Switch to Admin to add, edit, or delete transactions.">
-                <span>
-                  <button
-                    type="button"
-                    disabled
-                    className="inline-flex items-center gap-2 rounded-2xl bg-ink px-4 py-3 text-sm font-semibold text-white opacity-60 cursor-not-allowed dark:bg-white dark:text-slate-900"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Add Transaction
-                  </button>
-                </span>
-              </Tooltip>
-            )}
+            <div className="rounded-2xl border border-line/80 bg-surface-strong/70 px-4 py-3 text-sm text-muted">
+              {canManage
+                ? "Admin mode: editing controls are live."
+                : "Viewer mode: transaction actions remain read-only."}
+            </div>
           </div>
         </div>
 
@@ -157,8 +159,8 @@ export function TransactionsView({ isLoading }) {
           <label className="relative block">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
             <input
-              value={filters.search}
-              onChange={(event) => setSearch(event.target.value)}
+              value={searchInput}
+              onChange={(event) => setSearchInput(event.target.value)}
               placeholder="Search by description or category"
               className="w-full rounded-2xl border border-line/80 bg-surface-strong/70 py-3 pl-11 pr-4 text-sm text-ink outline-none transition focus:border-accent/40"
             />
@@ -223,10 +225,21 @@ export function TransactionsView({ isLoading }) {
             );
           })}
 
-          {(filters.search || filters.category !== "All") && (
+          {filters.day !== "All" && (
             <button
               type="button"
-              onClick={clearFilters}
+              onClick={clearDayFilter}
+              className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent-soft/40 px-4 py-2 text-sm font-semibold text-accent"
+            >
+              Day {formatDayMonth(filters.day)}
+              <X className="h-4 w-4" />
+            </button>
+          )}
+
+          {(filters.search || filters.category !== "All" || filters.day !== "All") && (
+            <button
+              type="button"
+              onClick={resetFilters}
               className="inline-flex items-center gap-2 rounded-full border border-line/80 px-4 py-2 text-sm font-semibold text-muted transition hover:text-ink"
             >
               <X className="h-4 w-4" />
@@ -251,17 +264,51 @@ export function TransactionsView({ isLoading }) {
       ) : (
         <EmptyState
           title="No transactions match these filters"
-          description="Try widening the date range, removing the category chip, or searching for a different merchant or category."
+          description="Try widening the date range, removing a chip, or adding a new transaction if you are working in Admin mode."
           action={
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="rounded-2xl bg-ink px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 dark:bg-white dark:text-slate-900"
-            >
-              Reset filters
-            </button>
+            canManage ? (
+              <button
+                type="button"
+                onClick={openCreate}
+                className="rounded-2xl bg-ink px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 dark:bg-white dark:text-slate-900"
+              >
+                Add transaction
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={resetFilters}
+                className="rounded-2xl bg-ink px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 dark:bg-white dark:text-slate-900"
+              >
+                Reset filters
+              </button>
+            )
           }
         />
+      )}
+
+      {canManage ? (
+        <button
+          type="button"
+          onClick={openCreate}
+          className="fixed bottom-6 right-6 z-30 inline-flex items-center gap-3 rounded-full bg-ink px-5 py-4 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5 hover:opacity-90 dark:bg-white dark:text-slate-900"
+        >
+          <Plus className="h-4 w-4" />
+          Add Transaction
+        </button>
+      ) : (
+        <Tooltip label="Switch to Admin to add a new transaction.">
+          <span className="fixed bottom-6 right-6 z-30">
+            <button
+              type="button"
+              disabled
+              className="inline-flex items-center gap-3 rounded-full bg-ink px-5 py-4 text-sm font-semibold text-white opacity-60 cursor-not-allowed shadow-glow dark:bg-white dark:text-slate-900"
+            >
+              <Plus className="h-4 w-4" />
+              Add Transaction
+            </button>
+          </span>
+        </Tooltip>
       )}
 
       <TransactionFormModal
@@ -274,3 +321,4 @@ export function TransactionsView({ isLoading }) {
     </div>
   );
 }
+
