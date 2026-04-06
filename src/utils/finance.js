@@ -143,7 +143,9 @@ export function formatSignedCurrency(value, compact = false) {
 }
 
 export function stripTime(date) {
+  if (!date) return new Date(NaN);
   const normalized = new Date(date);
+  if (isNaN(normalized.getTime())) return normalized;
   normalized.setHours(0, 0, 0, 0);
   return normalized;
 }
@@ -153,7 +155,16 @@ export function parseDate(value) {
     return stripTime(value);
   }
 
-  const [year, month, day] = String(value).split("-").map(Number);
+  if (!value || typeof value !== "string") {
+    return new Date(NaN);
+  }
+
+  const parts = value.split("-").map(Number);
+  if (parts.length !== 3 || parts.some(isNaN)) {
+    return new Date(NaN);
+  }
+
+  const [year, month, day] = parts;
   return stripTime(new Date(year, month - 1, day));
 }
 
@@ -165,19 +176,26 @@ export function addDays(date, days) {
 
 export function toDateKey(date) {
   const parsed = stripTime(date);
+  if (isNaN(parsed.getTime())) return "Invalid Date";
   return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, "0")}-${String(parsed.getDate()).padStart(2, "0")}`;
 }
 
 export function formatLongDate(value) {
-  return fullDateFormatter.format(parseDate(value));
+  const date = parseDate(value);
+  if (isNaN(date.getTime())) return "Invalid Date";
+  return fullDateFormatter.format(date);
 }
 
 export function formatDayMonth(value) {
-  return shortDateFormatter.format(parseDate(value));
+  const date = parseDate(value);
+  if (isNaN(date.getTime())) return "Invalid Date";
+  return shortDateFormatter.format(date);
 }
 
 export function formatMonth(value) {
-  return monthFormatter.format(parseDate(value));
+  const date = parseDate(value);
+  if (isNaN(date.getTime())) return "Invalid Date";
+  return monthFormatter.format(date);
 }
 
 export function formatRelativeTime(value, referenceDate = new Date()) {
@@ -185,7 +203,10 @@ export function formatRelativeTime(value, referenceDate = new Date()) {
     return "just now";
   }
 
-  const diffMs = referenceDate.getTime() - new Date(value).getTime();
+  const dateValue = new Date(value);
+  if (isNaN(dateValue.getTime())) return "some time ago";
+
+  const diffMs = referenceDate.getTime() - dateValue.getTime();
   const diffMinutes = Math.max(0, Math.floor(diffMs / 60000));
 
   if (diffMinutes < 1) {
@@ -520,6 +541,19 @@ export function getCategories(transactions) {
 
 export function getMonthlyComparison(transactions, referenceDate = new Date()) {
   const currentDate = parseDate(referenceDate);
+
+  if (isNaN(currentDate.getTime())) {
+    return {
+      currentLabel: "N/A",
+      previousLabel: "N/A",
+      current: { income: 0, expenses: 0, net: 0 },
+      previous: { income: 0, expenses: 0, net: 0 },
+      changes: { income: 0, expenses: 0, net: 0 },
+      currentTransactions: [],
+      previousTransactions: [],
+    };
+  }
+
   const currentMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
   const previousMonthStart = new Date(
     currentDate.getFullYear(),
