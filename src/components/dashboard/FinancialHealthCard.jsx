@@ -100,8 +100,8 @@ export function FinancialHealthCard({ health, dashboardMode, healthDelta, onOpen
           <p className="mt-1 text-[13px] leading-6 text-muted">{health.recommendation}</p>
         </div>
 
-        {/* Factors Grid - 2 Column for clarity */}
-        <div className="grid gap-3 sm:grid-cols-2">
+        {/* Factors Grid - Auto Stack for clarity */}
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
           {health.factors.map((factor) => (
             <div
               key={factor.id}

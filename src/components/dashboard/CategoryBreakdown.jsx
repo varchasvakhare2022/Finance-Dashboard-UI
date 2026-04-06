@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import { formatCurrency, formatPercent } from "../../utils/finance";
+import { cn, formatCurrency, formatPercent } from "../../utils/finance";
 import { Surface } from "../ui/Surface";
 
 function BreakdownTooltip({ active, payload }) {
@@ -52,8 +52,8 @@ export function CategoryBreakdown({ categories, selectedCategory, onSelectCatego
         </p>
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[160px_minmax(0,1fr)] lg:items-center">
-        <div className="h-[180px] w-full lg:h-[160px]">
+      <div className="mt-6 grid gap-6 lg:grid-cols-[180px_minmax(0,1fr)] lg:items-start">
+        <div className="h-[180px] w-full lg:sticky lg:top-0 lg:h-[180px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Tooltip content={<BreakdownTooltip />} />
@@ -61,8 +61,8 @@ export function CategoryBreakdown({ categories, selectedCategory, onSelectCatego
                 data={categories}
                 dataKey="value"
                 nameKey="category"
-                innerRadius={56}
-                outerRadius={80}
+                innerRadius={60}
+                outerRadius={88}
                 paddingAngle={4}
                 onClick={(entry) => onSelectCategory(entry.category)}
               >
@@ -74,7 +74,7 @@ export function CategoryBreakdown({ categories, selectedCategory, onSelectCatego
           </ResponsiveContainer>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {categories.map((item) => {
             const active = selectedCategory === item.category;
 
@@ -83,18 +83,21 @@ export function CategoryBreakdown({ categories, selectedCategory, onSelectCatego
                 key={item.category}
                 type="button"
                 onClick={() => onSelectCategory(item.category)}
-                className={`flex w-full items-center justify-between rounded-[20px] border px-4 py-3 text-left transition ${active ? "border-accent/20 bg-accent-soft/32" : "border-line/50 bg-surface/72 hover:border-line/65 hover:bg-surface"}`}
+                className={cn(
+                  "flex w-full items-start justify-between gap-4 rounded-[20px] border px-4 py-3 text-left transition duration-200",
+                  active ? "border-accent/25 bg-accent-soft/30" : "border-line/50 bg-surface/40 hover:border-line/70 hover:bg-surface/60"
+                )}
               >
-                <div className="flex items-center gap-3">
-                  <span className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
-                  <div>
-                    <p className="text-sm font-semibold text-ink">{item.category}</p>
-                    <p className="text-xs leading-5 text-muted">{formatPercent(item.share * 100)} of spend</p>
+                <div className="flex min-w-0 flex-1 items-start gap-3">
+                  <span className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold text-ink">{item.category}</p>
+                    <p className="mt-0.5 text-[11px] leading-5 text-muted">{formatPercent(item.share * 100)} of spend</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-ink">{formatCurrency(item.value)}</p>
-                  <div className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-muted">
+                <div className="shrink-0 text-right">
+                  <p className="text-sm font-bold text-ink tabular-nums">{formatCurrency(item.value)}</p>
+                  <div className="mt-1.5 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted/60">
                     Open
                     <ArrowRight className="h-3 w-3" />
                   </div>

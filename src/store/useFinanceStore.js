@@ -26,7 +26,6 @@ export const useFinanceStore = create(
     (set) => ({
       transactions: sortByDate(buildMockTransactions()),
       filters: defaultFilters,
-      selectedRole: "admin",
       dateRange: "30d",
       chartMode: "net",
       activeView: "dashboard",
@@ -34,7 +33,6 @@ export const useFinanceStore = create(
       lastUpdatedAt: new Date().toISOString(),
       hydrated: false,
       setHydrated: (hydrated) => set({ hydrated }),
-      setRole: (selectedRole) => set({ selectedRole }),
       setDateRange: (dateRange) => set({ dateRange }),
       setChartMode: (chartMode) => set({ chartMode }),
       setActiveView: (activeView) => set({ activeView }),
@@ -115,7 +113,6 @@ export const useFinanceStore = create(
       partialize: (state) => ({
         transactions: state.transactions,
         filters: state.filters,
-        selectedRole: state.selectedRole,
         dateRange: state.dateRange,
         chartMode: state.chartMode,
         activeView: state.activeView,

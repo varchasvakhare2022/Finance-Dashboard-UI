@@ -108,7 +108,7 @@ export function DashboardView({ isLoading }) {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <BalanceHeroCard
           balanceMetric={balanceMetric}
           incomeMetric={incomeMetric}

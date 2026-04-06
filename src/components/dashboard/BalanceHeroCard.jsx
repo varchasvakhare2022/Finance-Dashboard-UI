@@ -23,7 +23,7 @@ export function BalanceHeroCard({
       <div className="absolute inset-0 bg-gradient-to-br from-accent-soft/15 via-transparent to-transparent pointer-events-none" />
 
       <div className="relative flex flex-col h-full">
-        <div className="grid gap-8 xl:grid-cols-[minmax(0,1.35fr)_320px] xl:items-start flex-1">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(280px,0.9fr)] lg:items-start flex-1">
           <div className="min-w-0 flex flex-col h-full">
             <div className="flex items-center gap-3">
                <div className="inline-flex rounded-lg bg-accent-soft/50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-accent border border-accent/20">
@@ -59,10 +59,10 @@ export function BalanceHeroCard({
               {balanceMetric.detail}. Use this as your primary pulse before drilling into specific categories.
             </p>
 
-            <div className="mt-auto pt-10 grid gap-4 grid-cols-1 md:grid-cols-3">
+            <div className="mt-auto pt-10 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               <div className="group rounded-2xl border border-line/40 bg-surface/40 p-5 transition-all hover:bg-surface/60 hover:border-accent/20">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted/70">Inflow</p>
-                <p className="mt-2 text-2xl font-bold tracking-tight text-ink tabular-nums">
+                <p className="mt-2 text-xl font-bold tracking-tight text-ink tabular-nums whitespace-nowrap">
                   <AnimatedNumber
                     value={incomeMetric.value}
                     formatter={(value) => formatCurrency(Math.round(value))}
@@ -75,7 +75,7 @@ export function BalanceHeroCard({
 
               <div className="group rounded-2xl border border-line/40 bg-surface/40 p-5 transition-all hover:bg-surface/60 hover:border-accent/20">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted/70">Outflow</p>
-                <p className="mt-2 text-2xl font-bold tracking-tight text-ink tabular-nums">
+                <p className="mt-2 text-xl font-bold tracking-tight text-ink tabular-nums whitespace-nowrap">
                   <AnimatedNumber
                     value={expenseMetric.value}
                     formatter={(value) => formatCurrency(Math.round(value))}
@@ -86,9 +86,9 @@ export function BalanceHeroCard({
                 </p>
               </div>
 
-              <div className="group rounded-2xl border border-line/40 bg-surface/40 p-5 transition-all hover:bg-surface/60 hover:border-accent/20">
+              <div className="group rounded-2xl border border-line/40 bg-surface/40 p-5 transition-all hover:bg-surface/60 hover:border-accent/20 sm:col-span-2 lg:col-span-1">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted/70">Velocity</p>
-                <p className="mt-2 text-2xl font-bold tracking-tight text-ink tabular-nums">
+                <p className="mt-2 text-xl font-bold tracking-tight text-ink tabular-nums whitespace-nowrap">
                   <AnimatedNumber
                     value={netValue}
                     formatter={(value) => formatSignedCurrency(Math.round(value), true)}
@@ -104,19 +104,19 @@ export function BalanceHeroCard({
           <div className="min-w-0 h-full flex flex-col">
             <div className="flex-1 rounded-[28px] border border-line/40 bg-surface/40 p-5 shadow-panel backdrop-blur-md flex flex-col">
               <div className="flex items-start justify-between gap-4">
-                <div>
+                <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted">Range Dynamics</p>
-                  <p className="mt-1 text-[11px] leading-5 text-muted/70">
-                    Real-time movement across the selected window.
+                  <p className="mt-1 text-[11px] leading-5 text-muted/70 line-clamp-2">
+                    Movement across the selected window.
                   </p>
                 </div>
-                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-accent/10 border border-accent/20">
+                <div className="shrink-0 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-accent/10 border border-accent/20">
                   <span className="h-1 w-1 rounded-full bg-accent animate-pulse" />
                   <span className="text-[9px] font-bold uppercase text-accent tracking-tighter">Live</span>
                 </div>
               </div>
 
-              <div className="mt-auto h-[180px] w-full xl:h-[220px]">
+              <div className="mt-auto h-[180px] w-full lg:h-[220px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={balanceMetric.sparkline}>
                     <defs>
@@ -162,6 +162,7 @@ export function BalanceHeroCard({
         </div>
       </div>
     </Surface>
+
 
 
   );

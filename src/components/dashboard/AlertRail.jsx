@@ -1,5 +1,6 @@
 import {
   Activity,
+  ArrowRight,
   ChartPie,
   PiggyBank,
   ShieldCheck,
@@ -39,17 +40,17 @@ const TONES = {
 export function AlertRail({ alerts, onAction }) {
   return (
     <Surface className="px-5 py-5 animate-fade-up lg:px-6 lg:py-6">
-      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="text-sm font-medium text-muted">Needs attention</p>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-4">
+        <div className="min-w-[240px]">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Analysis Pulse</p>
           <h3 className="mt-2 font-display text-2xl font-bold tracking-tight text-ink">What looks off right now</h3>
         </div>
-        <p className="max-w-xl text-sm leading-7 text-muted">
+        <p className="max-w-xl text-sm leading-7 text-muted/80">
           Start here if you want the quickest explanation for what needs a closer look.
         </p>
       </div>
 
-      <div className="mt-6 grid gap-3 xl:grid-cols-3">
+      <div className="mt-8 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {alerts.map((alert) => {
           const Icon = ICONS[alert.icon] ?? TriangleAlert;
           const tone = TONES[alert.tone] ?? TONES.warning;
@@ -58,31 +59,32 @@ export function AlertRail({ alerts, onAction }) {
             <div
               key={alert.id}
               className={cn(
-                "hover-lift flex h-full flex-col justify-between rounded-[24px] border p-4 transition duration-200",
+                "group hover-lift flex h-full flex-col justify-between rounded-[28px] border p-5 transition duration-300",
                 tone.card,
               )}
             >
               <div className="flex items-start gap-4">
-                <span className={cn("mt-0.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl", tone.icon)}>
+                <span className={cn("mt-1 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl shadow-sm transition-transform group-hover:scale-105", tone.icon)}>
                   <Icon className="h-5 w-5" />
                 </span>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-ink">{alert.title}</p>
-                  <p className="mt-2 text-sm leading-7 text-muted">{alert.detail}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-ink leading-tight">{alert.title}</p>
+                  <p className="mt-3 text-[13px] leading-6 text-muted/90">{alert.detail}</p>
                 </div>
               </div>
 
               {alert.actionLabel ? (
-                <div className="mt-4">
+                <div className="mt-6">
                   <button
                     type="button"
                     onClick={() => onAction(alert)}
                     className={cn(
-                      "pressable inline-flex rounded-full border px-3 py-2 text-xs font-semibold transition duration-200",
+                      "pressable inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-all",
                       tone.button,
                     )}
                   >
                     {alert.actionLabel}
+                    <ArrowRight className="h-3 w-3" />
                   </button>
                 </div>
               ) : null}
@@ -93,3 +95,4 @@ export function AlertRail({ alerts, onAction }) {
     </Surface>
   );
 }
+

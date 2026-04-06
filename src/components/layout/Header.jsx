@@ -21,8 +21,6 @@ const NAV_ITEMS = [
 export function Header() {
   const activeView = useFinanceStore((state) => state.activeView);
   const setActiveView = useFinanceStore((state) => state.setActiveView);
-  const selectedRole = useFinanceStore((state) => state.selectedRole);
-  const setRole = useFinanceStore((state) => state.setRole);
   const search = useFinanceStore((state) => state.filters.search);
   const setSearch = useFinanceStore((state) => state.setSearch);
 
@@ -69,48 +67,25 @@ export function Header() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-3 md:gap-5">
-          <div className="relative hidden max-w-xs md:block">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+        <div className="flex items-center gap-3">
+          <div className="relative hidden sm:block">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Quick search..."
-              className="h-10 w-48 rounded-xl bg-surface-strong/40 pl-11 pr-4 text-xs font-medium text-ink outline-none transition-all placeholder:text-muted/50 focus:w-64 focus:bg-surface-strong/60 focus:ring-1 focus:ring-accent/30 lg:w-56 lg:focus:w-64 border border-transparent focus:border-accent/20"
+              className="h-10 w-64 rounded-xl border border-line/40 bg-surface/50 pl-10 pr-4 text-xs text-ink placeholder:text-muted/60 focus:bg-surface focus:outline-none focus:ring-1 focus:ring-accent/50"
             />
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 rounded-2xl bg-surface-strong/40 p-1 border border-line/50">
-              {ROLE_OPTIONS.map((role) => {
-                const isSelected = selectedRole === role.value;
-                return (
-                  <button
-                    key={role.value}
-                    onClick={() => setRole(role.value)}
-                    className={cn(
-                      "flex items-center gap-2 rounded-xl px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all",
-                      isSelected
-                        ? "bg-surface text-accent shadow-sm border border-accent/20"
-                        : "text-muted hover:text-ink"
-                    )}
-                  >
-                    {role.value === 'admin' ? <ShieldAlert className="h-3 w-3" /> : <User className="h-3 w-3" />}
-                    {role.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            <Tooltip label="Account Settings">
-              <button className="pressable flex h-10 w-10 items-center justify-center rounded-xl bg-surface-strong/40 text-muted transition hover:bg-surface hover:text-ink border border-line/50">
-                <div className="h-6 w-6 rounded-full bg-gradient-to-br from-surface-strong to-line flex items-center justify-center">
-                   <User className="h-4 w-4" />
-                </div>
-              </button>
-            </Tooltip>
-          </div>
+          <Tooltip label="Account Settings">
+            <button className="pressable flex h-10 w-10 items-center justify-center rounded-xl bg-surface-strong/40 text-muted transition hover:bg-surface hover:text-ink border border-line/50">
+              <div className="h-6 w-6 rounded-full bg-gradient-to-br from-surface-strong to-line flex items-center justify-center">
+                <User className="h-4 w-4" />
+              </div>
+            </button>
+          </Tooltip>
         </div>
       </Surface>
 
