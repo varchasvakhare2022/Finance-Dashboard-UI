@@ -4,7 +4,7 @@ export function SegmentedControl({ options, value, onChange, className }) {
   return (
     <div
       className={cn(
-        "inline-flex rounded-2xl border border-line/80 bg-surface/70 p-1 shadow-sm backdrop-blur",
+        "inline-flex rounded-[18px] border border-line/60 bg-surface-strong/72 p-1 shadow-sm backdrop-blur",
         className,
       )}
     >
@@ -17,10 +17,10 @@ export function SegmentedControl({ options, value, onChange, className }) {
             type="button"
             onClick={() => onChange(option.value)}
             className={cn(
-              "rounded-xl px-3 py-2 text-sm font-semibold transition duration-200",
+              "pressable rounded-[14px] px-3.5 py-2 text-sm font-semibold transition duration-200",
               active
-                ? "bg-ink text-white shadow-sm dark:bg-white dark:text-slate-900"
-                : "text-muted hover:text-ink dark:hover:text-white",
+                ? "bg-accent text-white shadow-sm"
+                : "text-muted hover:bg-surface hover:text-ink dark:hover:bg-surface dark:hover:text-white",
             )}
           >
             {option.label}

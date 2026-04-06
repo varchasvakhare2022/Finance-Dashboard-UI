@@ -2,22 +2,17 @@ import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { formatCurrency, formatPercent } from "../../utils/finance";
 import { Surface } from "../ui/Surface";
+import { AnimatedNumber } from "../ui/AnimatedNumber";
 
 const ACCENT_MAP = {
   emerald: {
     line: "#0f766e",
-    fill: "rgba(15, 118, 110, 0.16)",
-    chip: "bg-accent-soft/80 text-accent",
   },
   cyan: {
-    line: "#0891b2",
-    fill: "rgba(8, 145, 178, 0.16)",
-    chip: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300",
+    line: "#0f766e",
   },
   rose: {
-    line: "#e11d48",
-    fill: "rgba(225, 29, 72, 0.16)",
-    chip: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300",
+    line: "#dc2626",
   },
 };
 
@@ -27,27 +22,26 @@ export function SummaryCard({ metric }) {
   const TrendIcon = metric.trend.direction === "up" ? ArrowUpRight : ArrowDownRight;
 
   return (
-    <Surface className="hover-lift flex h-full flex-col justify-between px-5 py-5 animate-fade-up">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold text-muted">{metric.title}</p>
-          <p className="mt-3 font-display text-3xl font-bold tracking-tight text-ink">
-            {formatCurrency(metric.value)}
-          </p>
+    <Surface className="flex h-full flex-col justify-between px-5 py-5 animate-fade-up lg:px-7 lg:py-7">
+      <div>
+        <p className="text-[11px] font-bold uppercase tracking-widest text-muted">{metric.title}</p>
+        <p className="mt-2 font-display text-2xl font-bold tracking-tight text-ink">
+          <AnimatedNumber value={metric.value} formatter={(value) => formatCurrency(Math.round(value))} />
+        </p>
+        <div
+          className={`mt-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ${positiveTrend ? "bg-accent-soft/65 text-accent" : "bg-danger-soft/70 text-danger"}`}
+        >
+          <TrendIcon className="h-3.5 w-3.5" />
+          {formatPercent(metric.trend.percentage)}
         </div>
-
-        <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${accent.chip}`}>
-          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: accent.line }} />
-          Live
-        </span>
       </div>
 
-      <div className="mt-5 h-20 w-full">
+      <div className="mt-6 h-20 w-full rounded-[18px] border border-line/45 bg-surface-strong/45 p-1.5">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={metric.sparkline}>
             <defs>
               <linearGradient id={`gradient-${metric.id}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={accent.line} stopOpacity={0.3} />
+                <stop offset="5%" stopColor={accent.line} stopOpacity={0.16} />
                 <stop offset="95%" stopColor={accent.line} stopOpacity={0} />
               </linearGradient>
             </defs>
@@ -55,23 +49,18 @@ export function SummaryCard({ metric }) {
               type="monotone"
               dataKey="value"
               stroke={accent.line}
-              strokeWidth={2.5}
+              strokeWidth={2.2}
               fill={`url(#gradient-${metric.id})`}
               fillOpacity={1}
+              isAnimationActive
+              animationDuration={650}
+              animationEasing="ease-out"
             />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-3">
-        <div
-          className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold ${positiveTrend ? "bg-accent-soft/80 text-accent" : "bg-danger-soft/80 text-danger"}`}
-        >
-          <TrendIcon className="h-4 w-4" />
-          {formatPercent(metric.trend.percentage)}
-        </div>
-        <p className="text-right text-sm text-muted">{metric.detail}</p>
-      </div>
+      <p className="mt-3 max-w-[240px] text-xs leading-6 text-muted">{metric.detail}</p>
     </Surface>
   );
 }

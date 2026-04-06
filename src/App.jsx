@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import { DashboardView } from "./components/dashboard/DashboardView";
 import { InsightsView } from "./components/insights/InsightsView";
-import { Sidebar } from "./components/layout/Sidebar";
-import { Topbar } from "./components/layout/Topbar";
+import { Header } from "./components/layout/Header";
 import { TransactionsView } from "./components/transactions/TransactionsView";
 import { useFinanceStore } from "./store/useFinanceStore";
-import { cn } from "./utils/finance";
 
 const VIEW_COMPONENTS = {
   dashboard: DashboardView,
@@ -15,7 +13,6 @@ const VIEW_COMPONENTS = {
 
 export default function App() {
   const activeView = useFinanceStore((state) => state.activeView);
-  const darkMode = useFinanceStore((state) => state.darkMode);
   const hydrated = useFinanceStore((state) => state.hydrated);
   const setHydrated = useFinanceStore((state) => state.setHydrated);
   const [booting, setBooting] = useState(true);
@@ -46,23 +43,22 @@ export default function App() {
   const isLoading = !hydrated || booting;
 
   return (
-    <div className={cn(darkMode && "dark")}>
-      <div className="min-h-screen bg-canvas text-ink transition-colors duration-500">
-        <div className="pointer-events-none fixed inset-0 overflow-hidden">
-          <div className="absolute left-0 top-0 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
-          <div className="absolute bottom-10 right-0 h-72 w-72 rounded-full bg-warning/10 blur-3xl" />
-        </div>
+    <div className="flex min-h-screen flex-col overflow-x-hidden">
+      <Header />
 
-        <div className="relative mx-auto flex min-h-screen w-full max-w-[1600px] flex-col gap-4 px-4 py-4 lg:flex-row lg:px-6 lg:py-6">
-          <Sidebar />
-          <div className="flex min-h-[calc(100vh-2rem)] min-w-0 flex-1 flex-col gap-4">
-            <Topbar />
-            <main className="flex-1">
-              <ActiveView isLoading={isLoading} />
-            </main>
-          </div>
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-12 lg:px-8">
+        <div key={activeView} className="h-full animate-fade-up">
+          <ActiveView isLoading={isLoading} />
         </div>
+      </main>
+
+      {/* Modern Backdrop Gradients */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute -left-20 -top-20 h-96 w-96 rounded-full bg-accent/5 blur-[120px]" />
+        <div className="absolute -right-20 bottom-1/4 h-[500px] w-[500px] rounded-full bg-warning/5 blur-[140px]" />
+        <div className="absolute left-1/3 top-1/2 h-80 w-80 rounded-full bg-accent-soft/10 blur-[100px]" />
       </div>
     </div>
   );
 }
+

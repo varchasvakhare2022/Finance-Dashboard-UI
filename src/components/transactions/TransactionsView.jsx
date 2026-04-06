@@ -86,7 +86,7 @@ export function TransactionsView({ isLoading }) {
   };
 
   const handleDelete = (transaction) => {
-    const confirmed = window.confirm(`Delete ${transaction.description}? This action cannot be undone.`);
+    const confirmed = window.confirm(`Delete ${transaction.description}? This cannot be undone.`);
     if (confirmed) {
       deleteTransaction(transaction.id);
     }
@@ -127,14 +127,14 @@ export function TransactionsView({ isLoading }) {
   };
 
   return (
-    <div className="space-y-4">
-      <Surface className="space-y-4 px-5 py-5 animate-fade-up">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+    <div className="space-y-5">
+      <Surface className="space-y-5 px-5 py-5 animate-fade-up lg:px-6 lg:py-6">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted">Filters and actions</p>
-            <h3 className="mt-2 font-display text-2xl font-bold text-ink">Ledger controls</h3>
-            <p className="mt-2 text-sm leading-6 text-muted">
-              Showing {filteredTransactions.length} transactions with {formatSignedCurrency(visibleNet, true)} net flow.
+            <p className="text-sm font-medium text-muted">Find anything fast</p>
+            <h3 className="mt-2 font-display text-2xl font-bold tracking-tight text-ink">Your transaction list</h3>
+            <p className="mt-2 text-sm leading-7 text-muted">
+              Showing {filteredTransactions.length} entries. Net in this view: {formatSignedCurrency(visibleNet, true)}.
             </p>
           </div>
 
@@ -142,15 +142,15 @@ export function TransactionsView({ isLoading }) {
             <button
               type="button"
               onClick={handleExport}
-              className="inline-flex items-center gap-2 rounded-2xl border border-line/80 bg-surface-strong/70 px-4 py-3 text-sm font-semibold text-ink transition hover:border-accent/30 hover:text-accent"
+              className="pressable inline-flex items-center gap-2 rounded-[18px] border border-line/45 bg-surface-strong/60 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-surface"
             >
               <Download className="h-4 w-4" />
-              Export CSV
+              Download CSV
             </button>
-            <div className="rounded-2xl border border-line/80 bg-surface-strong/70 px-4 py-3 text-sm text-muted">
+            <div className="rounded-[18px] bg-surface-strong/55 px-4 py-3 text-sm text-muted">
               {canManage
-                ? "Admin mode: editing controls are live."
-                : "Viewer mode: transaction actions remain read-only."}
+                ? "You can edit from here."
+                : "You’re in view-only mode."}
             </div>
           </div>
         </div>
@@ -161,8 +161,8 @@ export function TransactionsView({ isLoading }) {
             <input
               value={searchInput}
               onChange={(event) => setSearchInput(event.target.value)}
-              placeholder="Search by description or category"
-              className="w-full rounded-2xl border border-line/80 bg-surface-strong/70 py-3 pl-11 pr-4 text-sm text-ink outline-none transition focus:border-accent/40"
+              placeholder="Search description or category"
+              className="w-full rounded-[18px] border border-line/45 bg-surface-strong/55 py-3 pl-11 pr-4 text-sm text-ink outline-none transition focus:border-accent/30"
             />
           </label>
 
@@ -181,10 +181,10 @@ export function TransactionsView({ isLoading }) {
                   type="button"
                   onClick={() => toggleSort(option.id)}
                   className={cn(
-                    "inline-flex items-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition",
+                    "pressable inline-flex items-center gap-2 rounded-[18px] px-4 py-3 text-sm font-semibold transition",
                     active
-                      ? "border-accent/30 bg-accent-soft/50 text-accent"
-                      : "border-line/80 bg-surface-strong/70 text-muted hover:text-ink",
+                      ? "bg-surface text-ink shadow-panel"
+                      : "bg-surface-strong/55 text-muted hover:bg-surface hover:text-ink",
                   )}
                 >
                   <SlidersHorizontal className="h-4 w-4" />
@@ -214,10 +214,10 @@ export function TransactionsView({ isLoading }) {
                   })
                 }
                 className={cn(
-                  "rounded-full border px-4 py-2 text-sm font-semibold transition",
+                  "pressable rounded-full px-4 py-2 text-sm font-semibold transition",
                   active
-                    ? "border-transparent bg-ink text-white dark:bg-white dark:text-slate-900"
-                    : "border-line/80 bg-surface-strong/70 text-muted hover:border-accent/30 hover:text-ink dark:hover:text-white",
+                    ? "bg-surface text-ink shadow-panel"
+                    : "bg-surface-strong/50 text-muted hover:bg-surface hover:text-ink",
                 )}
               >
                 {category}
@@ -229,9 +229,9 @@ export function TransactionsView({ isLoading }) {
             <button
               type="button"
               onClick={clearDayFilter}
-              className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent-soft/40 px-4 py-2 text-sm font-semibold text-accent"
+              className="pressable inline-flex items-center gap-2 rounded-full bg-accent-soft/40 px-4 py-2 text-sm font-semibold text-accent"
             >
-              Day {formatDayMonth(filters.day)}
+              {formatDayMonth(filters.day)}
               <X className="h-4 w-4" />
             </button>
           )}
@@ -240,7 +240,7 @@ export function TransactionsView({ isLoading }) {
             <button
               type="button"
               onClick={resetFilters}
-              className="inline-flex items-center gap-2 rounded-full border border-line/80 px-4 py-2 text-sm font-semibold text-muted transition hover:text-ink"
+              className="pressable inline-flex items-center gap-2 rounded-full bg-surface-strong/55 px-4 py-2 text-sm font-semibold text-muted transition hover:bg-surface hover:text-ink"
             >
               <X className="h-4 w-4" />
               Clear filters
@@ -263,24 +263,24 @@ export function TransactionsView({ isLoading }) {
         </Surface>
       ) : (
         <EmptyState
-          title="No transactions match these filters"
-          description="Try widening the date range, removing a chip, or adding a new transaction if you are working in Admin mode."
+          title="Nothing matches that yet"
+          description="Try clearing a filter, searching for something broader, or widening the time window."
           action={
             canManage ? (
               <button
                 type="button"
                 onClick={openCreate}
-                className="rounded-2xl bg-ink px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 dark:bg-white dark:text-slate-900"
+                className="pressable rounded-[18px] bg-accent px-4 py-3 text-sm font-semibold text-white transition hover:opacity-95"
               >
-                Add transaction
+                Add a transaction
               </button>
             ) : (
               <button
                 type="button"
                 onClick={resetFilters}
-                className="rounded-2xl bg-ink px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 dark:bg-white dark:text-slate-900"
+                className="pressable rounded-[18px] bg-accent px-4 py-3 text-sm font-semibold text-white transition hover:opacity-95"
               >
-                Reset filters
+                Clear filters
               </button>
             )
           }
@@ -291,21 +291,21 @@ export function TransactionsView({ isLoading }) {
         <button
           type="button"
           onClick={openCreate}
-          className="fixed bottom-6 right-6 z-30 inline-flex items-center gap-3 rounded-full bg-ink px-5 py-4 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5 hover:opacity-90 dark:bg-white dark:text-slate-900"
+          className="pressable fixed bottom-6 right-6 z-30 inline-flex items-center gap-3 rounded-full bg-accent px-5 py-4 text-sm font-semibold text-white shadow-panel transition hover:-translate-y-0.5 hover:opacity-95"
         >
           <Plus className="h-4 w-4" />
-          Add Transaction
+          New transaction
         </button>
       ) : (
-        <Tooltip label="Switch to Admin to add a new transaction.">
+        <Tooltip label="Switch to edit mode to add or change transactions.">
           <span className="fixed bottom-6 right-6 z-30">
             <button
               type="button"
               disabled
-              className="inline-flex items-center gap-3 rounded-full bg-ink px-5 py-4 text-sm font-semibold text-white opacity-60 cursor-not-allowed shadow-glow dark:bg-white dark:text-slate-900"
+              className="inline-flex cursor-not-allowed items-center gap-3 rounded-full bg-accent px-5 py-4 text-sm font-semibold text-white opacity-50 shadow-panel"
             >
               <Plus className="h-4 w-4" />
-              Add Transaction
+              New transaction
             </button>
           </span>
         </Tooltip>
@@ -321,4 +321,3 @@ export function TransactionsView({ isLoading }) {
     </div>
   );
 }
-

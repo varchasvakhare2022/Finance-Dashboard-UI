@@ -23,14 +23,14 @@ export default {
         display: ["Space Grotesk", "Manrope", "ui-sans-serif", "sans-serif"],
       },
       boxShadow: {
-        glow: "0 24px 80px rgba(15, 23, 42, 0.12)",
-        panel: "0 24px 60px rgba(15, 23, 42, 0.08)",
+        glow: "0 18px 40px rgba(15, 23, 42, 0.1)",
+        panel: "0 10px 24px rgba(15, 23, 42, 0.08)",
       },
       keyframes: {
         "fade-up": {
           "0%": {
             opacity: "0",
-            transform: "translateY(14px)",
+            transform: "translateY(12px)",
           },
           "100%": {
             opacity: "1",
@@ -47,7 +47,7 @@ export default {
         },
       },
       animation: {
-        "fade-up": "fade-up 0.65s ease-out both",
+        "fade-up": "fade-up 0.45s ease-out both",
         shimmer: "shimmer 2s linear infinite",
       },
     },

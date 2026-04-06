@@ -19,52 +19,73 @@ const ICONS = {
 };
 
 const TONES = {
-  positive: "bg-accent-soft/70 text-accent",
-  warning: "bg-warning-soft/80 text-warning",
-  critical: "bg-danger-soft/80 text-danger",
+  positive: {
+    card: "border-line/50 bg-surface/72",
+    icon: "bg-accent-soft/70 text-accent",
+    button: "border-line/55 text-ink hover:border-accent/25 hover:bg-surface",
+  },
+  warning: {
+    card: "border-warning/20 bg-warning-soft/18",
+    icon: "bg-warning-soft/75 text-warning",
+    button: "border-line/55 text-ink hover:border-warning/25 hover:bg-surface",
+  },
+  critical: {
+    card: "border-danger/20 bg-danger-soft/16",
+    icon: "bg-danger-soft/75 text-danger",
+    button: "border-line/55 text-ink hover:border-danger/25 hover:bg-surface",
+  },
 };
 
 export function AlertRail({ alerts, onAction }) {
   return (
-    <Surface className="h-full px-5 py-5 animate-fade-up">
-      <div className="flex items-start justify-between gap-4">
+    <Surface className="px-5 py-5 animate-fade-up lg:px-6 lg:py-6">
+      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted">Smart alerts</p>
-          <h3 className="mt-2 font-display text-2xl font-bold text-ink">What needs attention now</h3>
-          <p className="mt-2 text-sm leading-6 text-muted">
-            Alerts are ranked by risk so you can prioritize what to inspect next.
-          </p>
+          <p className="text-sm font-medium text-muted">Needs attention</p>
+          <h3 className="mt-2 font-display text-2xl font-bold tracking-tight text-ink">What looks off right now</h3>
         </div>
+        <p className="max-w-xl text-sm leading-7 text-muted">
+          Start here if you want the quickest explanation for what needs a closer look.
+        </p>
       </div>
 
-      <div className="mt-6 space-y-3">
+      <div className="mt-6 grid gap-3 xl:grid-cols-3">
         {alerts.map((alert) => {
           const Icon = ICONS[alert.icon] ?? TriangleAlert;
+          const tone = TONES[alert.tone] ?? TONES.warning;
 
           return (
-            <div key={alert.id} className="rounded-[24px] border border-line/80 bg-surface-strong/75 p-4 transition hover:border-accent/20 hover:bg-surface">
+            <div
+              key={alert.id}
+              className={cn(
+                "hover-lift flex h-full flex-col justify-between rounded-[24px] border p-4 transition duration-200",
+                tone.card,
+              )}
+            >
               <div className="flex items-start gap-4">
-                <span className={cn("mt-0.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl", TONES[alert.tone] ?? TONES.warning)}>
+                <span className={cn("mt-0.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl", tone.icon)}>
                   <Icon className="h-5 w-5" />
                 </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <p className="text-sm font-semibold text-ink">{alert.title}</p>
-                      <p className="mt-1 text-sm leading-6 text-muted">{alert.detail}</p>
-                    </div>
-                    {alert.actionLabel ? (
-                      <button
-                        type="button"
-                        onClick={() => onAction(alert)}
-                        className="inline-flex flex-shrink-0 rounded-full border border-line/80 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-ink transition hover:border-accent/30 hover:text-accent"
-                      >
-                        {alert.actionLabel}
-                      </button>
-                    ) : null}
-                  </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-ink">{alert.title}</p>
+                  <p className="mt-2 text-sm leading-7 text-muted">{alert.detail}</p>
                 </div>
               </div>
+
+              {alert.actionLabel ? (
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={() => onAction(alert)}
+                    className={cn(
+                      "pressable inline-flex rounded-full border px-3 py-2 text-xs font-semibold transition duration-200",
+                      tone.button,
+                    )}
+                  >
+                    {alert.actionLabel}
+                  </button>
+                </div>
+              ) : null}
             </div>
           );
         })}

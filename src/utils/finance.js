@@ -5,55 +5,61 @@ export const DATE_RANGE_OPTIONS = [
 ];
 
 export const ROLE_OPTIONS = [
-  { label: "Viewer", value: "viewer" },
-  { label: "Admin", value: "admin" },
+  { label: "View only", value: "viewer" },
+  { label: "Can edit", value: "admin" },
 ];
 
 export const DASHBOARD_MODE_OPTIONS = [
-  { label: "Savings Focus", value: "savings" },
-  { label: "Spending Focus", value: "spending" },
+  { label: "Save more", value: "savings" },
+  { label: "Watch spending", value: "spending" },
+];
+
+export const CHART_MODE_OPTIONS = [
+  { label: "Income", value: "income" },
+  { label: "Expense", value: "expense" },
+  { label: "Net", value: "net" },
 ];
 
 export const CATEGORY_META = {
   Salary: {
     dot: "#0f766e",
-    badge: "bg-accent-soft/80 text-accent",
+    badge: "border border-line/70 bg-surface-strong/90 text-ink",
   },
   Freelance: {
     dot: "#14b8a6",
-    badge: "bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300",
+    badge: "border border-line/70 bg-surface-strong/90 text-ink",
   },
   Housing: {
     dot: "#7c3aed",
-    badge: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
+    badge: "border border-line/70 bg-surface-strong/90 text-ink",
   },
   Food: {
     dot: "#f97316",
-    badge: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
+    badge: "border border-line/70 bg-surface-strong/90 text-ink",
   },
   Groceries: {
     dot: "#84cc16",
-    badge: "bg-lime-100 text-lime-700 dark:bg-lime-900/40 dark:text-lime-300",
+    badge: "border border-line/70 bg-surface-strong/90 text-ink",
   },
   Transport: {
     dot: "#0284c7",
-    badge: "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300",
+    badge: "border border-line/70 bg-surface-strong/90 text-ink",
   },
   Utilities: {
     dot: "#eab308",
-    badge: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+    badge: "border border-line/70 bg-surface-strong/90 text-ink",
   },
   Subscriptions: {
     dot: "#ef4444",
-    badge: "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300",
+    badge: "border border-line/70 bg-surface-strong/90 text-ink",
   },
   Travel: {
     dot: "#2563eb",
-    badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
+    badge: "border border-line/70 bg-surface-strong/90 text-ink",
   },
   Entertainment: {
     dot: "#db2777",
-    badge: "bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300",
+    badge: "border border-line/70 bg-surface-strong/90 text-ink",
   },
 };
 
@@ -435,30 +441,30 @@ export function getOverviewMetrics(transactions, range, referenceDate = new Date
   return [
     {
       id: "balance",
-      title: "Total Balance",
+      title: "Balance",
       value: currentBalance,
       trend: describeTrend(currentBalance, previousBalance, "balance"),
       sparkline: getDailySeries(transactions, range, "balance", referenceDate).slice(-12),
       accent: "emerald",
-      detail: `${formatSignedCurrency(getNetTotal(currentTransactions), true)} net this period`,
+      detail: `${formatSignedCurrency(getNetTotal(currentTransactions), true)} left after everything`,
     },
     {
       id: "income",
-      title: "Income",
+      title: "Money coming in",
       value: currentIncome,
       trend: describeTrend(currentIncome, previousIncome, "income"),
       sparkline: getDailySeries(transactions, range, "income", referenceDate).slice(-12),
       accent: "cyan",
-      detail: "Salary, bonus, and freelance inflows",
+      detail: "Paychecks and other incoming money",
     },
     {
       id: "expenses",
-      title: "Expenses",
+      title: "Money going out",
       value: currentExpenses,
       trend: describeTrend(currentExpenses, previousExpenses, "expense"),
       sparkline: getDailySeries(transactions, range, "expense", referenceDate).slice(-12),
       accent: "rose",
-      detail: "Operating spend across daily categories",
+      detail: "Bills, food, travel, and everything else",
     },
   ];
 }
@@ -597,16 +603,16 @@ export function getHealthScore(transactions, range, referenceDate = new Date()) 
 
   let label = "Critical";
   let tone = "critical";
-  let summary = "Expense pressure is crowding out savings and weakening resilience.";
+  let summary = "Things feel a little tight right now.";
 
   if (score >= 78) {
     label = "Good";
     tone = "positive";
-    summary = "Income coverage and savings discipline are keeping the dashboard in a healthy zone.";
+    summary = "You are in a healthy spot right now.";
   } else if (score >= 55) {
     label = "Warning";
     tone = "warning";
-    summary = "The overall picture is workable, but a few spending behaviors need closer attention.";
+    summary = "Mostly okay, but a couple of habits are dragging this down.";
   }
 
   const currentBalance = getDailySeries(transactions, range, "balance", referenceDate).at(-1)?.value ?? 0;
@@ -623,37 +629,37 @@ export function getHealthScore(transactions, range, referenceDate = new Date()) 
     factors: [
       {
         id: "coverage",
-        title: "Income coverage",
+        title: "Income vs spend",
         value: formatFactor(expenseCoverage),
-        detail: "How comfortably income absorbs expense run rate.",
+        detail: "How comfortably your income is covering what goes out.",
         tone: expenseCoverage >= 1.2 ? "positive" : "warning",
       },
       {
         id: "savings",
-        title: "Savings rate",
+        title: "What you keep",
         value: formatPercent(savingsRate),
         detail:
           savingsRate >= 20
-            ? "Above the recommended 20% savings threshold."
-            : "Below the recommended 20% savings threshold.",
+            ? "You are keeping more than the 20% goal."
+            : "You are keeping less than the 20% goal.",
         tone: savingsRate >= 20 ? "positive" : "warning",
       },
       {
         id: "stability",
-        title: "Spending spikes",
-        value: spikes.length ? `${spikes.length} flagged` : "Stable",
+        title: "Big spend days",
+        value: spikes.length ? `${spikes.length} flagged` : "Steady",
         detail: spikes.length
-          ? "Lumpy expense days are pulling the score down."
-          : "No unusual spikes were detected in this window.",
+          ? "A few heavy days are doing most of the damage."
+          : "Nothing unusually sharp showed up in this window.",
         tone: spikes.length ? "warning" : "positive",
       },
     ],
     recommendation:
       savingsRate < 20
-        ? "Push savings above 20% to restore healthy monthly slack."
+        ? "Try to keep more than 20% of your income untouched."
         : spikes.length
-          ? "Smooth out large spend days to reduce volatility in the score."
-          : "The current cash profile is stable enough to keep investing in longer-term goals.",
+          ? "A few large spend days are swinging the month more than they should."
+          : "You have a decent buffer right now, so nothing looks urgent.",
   };
 }
 
@@ -672,9 +678,9 @@ export function getAlertFeed(transactions, range, referenceDate = new Date()) {
       id: "spike",
       tone: "warning",
       icon: "triangle-alert",
-      title: "Unusual spending spike detected",
-      detail: `${formatLongDate(spike.date)} recorded ${formatCurrency(spike.value)}, or ${formatPercent((spike.intensity - 1) * 100)} above a typical expense day.`,
-      actionLabel: "Review day",
+      title: "One day of spending jumped",
+      detail: `${formatLongDate(spike.date)} came in at ${formatCurrency(spike.value)}, which is ${formatPercent((spike.intensity - 1) * 100)} above a usual spend day.`,
+      actionLabel: "See that day",
       target: { type: "day", value: spike.date },
     });
   }
@@ -684,9 +690,9 @@ export function getAlertFeed(transactions, range, referenceDate = new Date()) {
       id: "savings-rate",
       tone: "warning",
       icon: "piggy-bank",
-      title: "You are saving less than recommended",
-      detail: `Savings rate is ${formatPercent(health.savingsRate)} against the recommended 20% benchmark.`,
-      actionLabel: "Review spending",
+      title: "You are keeping less than planned",
+      detail: `Right now you are keeping ${formatPercent(health.savingsRate)} of income, below the 20% goal.`,
+      actionLabel: "See why",
       target: { type: "view", value: "insights" },
     });
   }
@@ -696,9 +702,9 @@ export function getAlertFeed(transactions, range, referenceDate = new Date()) {
       id: "expense-velocity",
       tone: "critical",
       icon: "activity",
-      title: "Expense run-rate is accelerating",
-      detail: `Spending is ${formatPercent(comparison.changes.expenses)} above the same point last month.`,
-      actionLabel: "Open insights",
+      title: "Spending is running hotter than last month",
+      detail: `You have spent ${formatPercent(comparison.changes.expenses)} more than this point last month.`,
+      actionLabel: "See insights",
       target: { type: "view", value: "insights" },
     });
   }
@@ -708,9 +714,9 @@ export function getAlertFeed(transactions, range, referenceDate = new Date()) {
       id: "category-concentration",
       tone: "warning",
       icon: "chart-pie",
-      title: `${topCategory.category} is dominating spend`,
-      detail: `${topCategory.category} accounts for ${formatPercent(topCategory.share * 100)} of current expenses.`,
-      actionLabel: "Inspect category",
+      title: `${topCategory.category} is taking the biggest bite`,
+      detail: `${topCategory.category} makes up ${formatPercent(topCategory.share * 100)} of what is going out right now.`,
+      actionLabel: "Open category",
       target: { type: "category", value: topCategory.category },
     });
   }
@@ -721,9 +727,9 @@ export function getAlertFeed(transactions, range, referenceDate = new Date()) {
       id: "balance-threshold",
       tone: "critical",
       icon: "wallet",
-      title: "Balance dropped below comfort threshold",
-      detail: `Current balance is ${formatCurrency(health.currentBalance)} against a comfort threshold of ${formatCurrency(reserveThreshold)}.`,
-      actionLabel: "Review ledger",
+      title: "Your buffer is getting a bit tight",
+      detail: `You are at ${formatCurrency(health.currentBalance)} against a comfort line of ${formatCurrency(reserveThreshold)}.`,
+      actionLabel: "Open transactions",
       target: { type: "view", value: "transactions" },
     });
   }
@@ -733,9 +739,9 @@ export function getAlertFeed(transactions, range, referenceDate = new Date()) {
       id: "all-clear",
       tone: "positive",
       icon: "shield-check",
-      title: "Cash position looks stable",
-      detail: "No balance stress or unusual spending spikes were detected in the selected range.",
-      actionLabel: "Open insights",
+      title: "Nothing urgent right now",
+      detail: "No unusual swings or obvious pressure points showed up in this range.",
+      actionLabel: "See insights",
       target: { type: "view", value: "insights" },
     });
   }
@@ -843,15 +849,15 @@ export function getInsights(
 
   const heroTitle =
     dashboardMode === "spending"
-      ? `${topCategory.category} is the largest pressure point right now`
+      ? `${topCategory.category} is doing most of the damage right now`
       : health.savingsRate >= 20
-        ? "Savings momentum is holding above the healthy zone"
-        : "Savings discipline needs attention before spend grows further";
+        ? "You are still keeping a healthy buffer"
+        : "You are keeping less than you probably expect";
 
   const heroText =
     dashboardMode === "spending"
-      ? `${topCategory.category} represents ${formatPercent(topCategory.share * 100)} of expense outflow in the selected range, while overall spend is ${comparison.changes.expenses >= 0 ? "up" : "down"} ${formatPercent(Math.abs(comparison.changes.expenses))} versus the same point last month.`
-      : `Financial health is ${health.score}/100 with a ${formatPercent(health.savingsRate)} savings rate. ${health.recommendation}`;
+      ? `${topCategory.category} is ${formatPercent(topCategory.share * 100)} of spending in this window, and overall spend is ${comparison.changes.expenses >= 0 ? "up" : "down"} ${formatPercent(Math.abs(comparison.changes.expenses))} from the same point last month.`
+      : `Your health score is ${health.score}/100, and you are keeping ${formatPercent(health.savingsRate)} of income. ${health.recommendation}`;
 
   return {
     heroTitle,
@@ -862,36 +868,36 @@ export function getInsights(
       {
         id: "expenses-change",
         icon: comparison.changes.expenses >= 0 ? "trending-up" : "trending-down",
-        title: "Spending vs last month",
+        title: "Vs last month",
         value: `${comparison.changes.expenses >= 0 ? "+" : ""}${formatPercent(comparison.changes.expenses)}`,
-        detail: `Spending ${comparison.changes.expenses >= 0 ? "increased" : "decreased"} compared to the same point last month.`,
+        detail: "A quick read on whether spending is picking up or easing off.",
         tone: comparison.changes.expenses >= 0 ? "rose" : "emerald",
       },
       {
         id: "category-share",
         icon: "chart-pie",
-        title: "Category concentration",
+        title: "Biggest category",
         value: `${topCategory.category} ${formatPercent(topCategory.share * 100)}`,
-        detail: `${topCategory.category} is ${formatPercent(topCategory.share * 100)} of total expenses in the selected range.`,
+        detail: `${topCategory.category} is taking the biggest share of spending right now.`,
         tone: "violet",
       },
       {
         id: "savings-target",
         icon: health.savingsRate >= 20 ? "shield-check" : "piggy-bank",
-        title: "Savings target",
+        title: "Saved this month",
         value: formatPercent(health.savingsRate),
         detail:
           health.savingsRate >= 20
-            ? "Savings is running above the recommended 20% threshold."
-            : `You are saving ${formatPercent(20 - health.savingsRate)} below the recommended 20% threshold.`,
+            ? "You are above the 20% goal."
+            : `You are ${formatPercent(20 - health.savingsRate)} short of the 20% goal.`,
         tone: health.savingsRate >= 20 ? "emerald" : "amber",
       },
       {
         id: "health-score",
         icon: "activity",
-        title: "Financial health score",
+        title: "Health score",
         value: `${health.score}/100`,
-        detail: `${health.label} status based on coverage, savings, and spending stability.`,
+        detail: `${health.label} based on income cover, money kept, and how spiky spending feels.`,
         tone: health.tone === "positive" ? "emerald" : health.tone === "warning" ? "amber" : "rose",
       },
     ],
@@ -917,13 +923,17 @@ export function getInsights(
     ],
     topCategories: categoryDiffs.slice(0, 4),
     observations: [
-      `Spending changed ${comparison.changes.expenses >= 0 ? "up" : "down"} ${formatPercent(Math.abs(comparison.changes.expenses))} compared to last month.`,
+      `Spending is ${comparison.changes.expenses >= 0 ? "up" : "down"} ${formatPercent(Math.abs(comparison.changes.expenses))} from last month.`,
       foodCategory
-        ? `Food category is ${formatPercent(foodCategory.share * 100)} of total expenses in the selected range.`
-        : `${topCategory.category} is the single largest category at ${formatPercent(topCategory.share * 100)} of expenses.`,
+        ? `Food is ${formatPercent(foodCategory.share * 100)} of what is going out in this window.`
+        : `${topCategory.category} is the biggest line item at ${formatPercent(topCategory.share * 100)} of spend.`,
       health.savingsRate >= 20
-        ? `Savings rate is holding above the recommended 20% floor at ${formatPercent(health.savingsRate)}.`
-        : `You are saving less than recommended at ${formatPercent(health.savingsRate)} versus the 20% goal.`,
+        ? `You are still keeping more than the 20% goal at ${formatPercent(health.savingsRate)}.`
+        : `You are keeping ${formatPercent(health.savingsRate)}, which is below the 20% goal.`,
     ],
   };
 }
+
+
+
+

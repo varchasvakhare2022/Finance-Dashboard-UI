@@ -11,14 +11,14 @@ function BreakdownTooltip({ active, payload }) {
   const item = payload[0].payload;
 
   return (
-    <div className="rounded-2xl border border-line/80 bg-surface px-4 py-3 shadow-lg backdrop-blur">
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">{item.category}</p>
+    <div className="rounded-[18px] border border-line/55 bg-surface px-4 py-3 shadow-panel backdrop-blur">
+      <p className="text-sm font-medium text-muted">{item.category}</p>
       <p className="mt-2 text-base font-bold text-ink">{formatCurrency(item.value)}</p>
       <div className="mt-2 flex items-center gap-2 text-sm text-muted">
-        <span>{formatPercent(item.share * 100)} of expenses</span>
+        <span>{formatPercent(item.share * 100)} of spending</span>
         <span>
           {item.change >= 0 ? "+" : ""}
-          {formatPercent(item.change)} vs previous range
+          {formatPercent(item.change)} vs last period
         </span>
       </div>
     </div>
@@ -28,13 +28,13 @@ function BreakdownTooltip({ active, payload }) {
 export function CategoryBreakdown({ categories, selectedCategory, onSelectCategory }) {
   if (!categories.length) {
     return (
-      <Surface className="flex h-full flex-col items-center justify-center px-5 py-5 text-center animate-fade-up">
-        <div className="rounded-2xl bg-accent-soft/70 px-4 py-3 text-sm font-semibold text-accent">
-          Category mix unavailable
+      <Surface className="flex h-full flex-col items-center justify-center px-5 py-6 text-center animate-fade-up">
+        <div className="rounded-full bg-accent-soft/60 px-4 py-2 text-sm font-semibold text-accent">
+          Nothing to show yet
         </div>
-        <h3 className="mt-4 font-display text-2xl font-bold text-ink">No expense data in this range</h3>
-        <p className="mt-2 max-w-sm text-sm leading-6 text-muted">
-          Widen the date range or add an expense transaction to see how spending is distributed.
+        <h3 className="mt-4 font-display text-2xl font-bold text-ink">No spending in this range</h3>
+        <p className="mt-2 max-w-sm text-sm leading-7 text-muted">
+          Try a wider time range, or add an expense and it will show up here.
         </p>
       </Surface>
     );
@@ -43,17 +43,17 @@ export function CategoryBreakdown({ categories, selectedCategory, onSelectCatego
   const total = categories.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <Surface className="flex h-full flex-col px-5 py-5 animate-fade-up">
-      <div className="space-y-2">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted">Category mix</p>
-        <h3 className="font-display text-2xl font-bold text-ink">Where the money went</h3>
-        <p className="text-sm leading-6 text-muted">
-          Click the chart or any row to inspect the category in a drill-down modal.
+    <Surface className="flex h-full flex-col px-5 py-5 animate-fade-up lg:px-6 lg:py-6">
+      <div className="space-y-0.5">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Why it changed</p>
+        <h3 className="font-display text-lg font-bold tracking-tight text-ink">Spending by category</h3>
+        <p className="text-xs leading-6 text-muted">
+          Pick a slice or a row to drill into that category.
         </p>
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[180px_minmax(0,1fr)] lg:items-center">
-        <div className="h-[220px] w-full lg:h-[180px]">
+      <div className="mt-4 grid gap-4 lg:grid-cols-[160px_minmax(0,1fr)] lg:items-center">
+        <div className="h-[180px] w-full lg:h-[160px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Tooltip content={<BreakdownTooltip />} />
@@ -83,19 +83,19 @@ export function CategoryBreakdown({ categories, selectedCategory, onSelectCatego
                 key={item.category}
                 type="button"
                 onClick={() => onSelectCategory(item.category)}
-                className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition ${active ? "border-accent/30 bg-accent-soft/40" : "border-line/70 bg-surface-strong/70 hover:border-accent/20 hover:bg-surface"}`}
+                className={`flex w-full items-center justify-between rounded-[20px] border px-4 py-3 text-left transition ${active ? "border-accent/20 bg-accent-soft/32" : "border-line/50 bg-surface/72 hover:border-line/65 hover:bg-surface"}`}
               >
                 <div className="flex items-center gap-3">
                   <span className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
                   <div>
                     <p className="text-sm font-semibold text-ink">{item.category}</p>
-                    <p className="text-xs text-muted">{formatPercent(item.share * 100)} of spend</p>
+                    <p className="text-xs leading-5 text-muted">{formatPercent(item.share * 100)} of spend</p>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-semibold text-ink">{formatCurrency(item.value)}</p>
-                  <div className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-muted">
-                    Inspect
+                  <div className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-muted">
+                    Open
                     <ArrowRight className="h-3 w-3" />
                   </div>
                 </div>
@@ -105,9 +105,9 @@ export function CategoryBreakdown({ categories, selectedCategory, onSelectCatego
         </div>
       </div>
 
-      <div className="mt-6 rounded-2xl border border-line/70 bg-surface-strong/70 px-4 py-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">Total filtered spend</p>
-        <p className="mt-2 text-2xl font-bold text-ink">{formatCurrency(total)}</p>
+      <div className="mt-6 rounded-[20px] border border-line/45 bg-surface-strong/45 px-4 py-3">
+        <p className="text-[11px] font-bold uppercase tracking-wider text-muted">Total going out</p>
+        <p className="mt-1 text-xl font-bold text-ink">{formatCurrency(total)}</p>
       </div>
     </Surface>
   );

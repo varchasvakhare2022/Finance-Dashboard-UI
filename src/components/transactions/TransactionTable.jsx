@@ -16,7 +16,7 @@ function SortIndicator({ active, direction }) {
 
 function ActionButtons({ canManage, onEdit, onDelete, reason }) {
   const disabledButtonClass =
-    "rounded-xl border border-line/80 p-2 text-muted opacity-60 cursor-not-allowed";
+    "rounded-[14px] bg-surface-strong/60 p-2 text-muted opacity-60 cursor-not-allowed";
 
   if (!canManage) {
     return (
@@ -44,14 +44,14 @@ function ActionButtons({ canManage, onEdit, onDelete, reason }) {
       <button
         type="button"
         onClick={onEdit}
-        className="rounded-xl border border-line/80 p-2 text-muted transition hover:border-accent/30 hover:text-accent"
+        className="pressable rounded-[14px] bg-surface-strong/60 p-2 text-muted transition hover:bg-surface hover:text-ink"
       >
         <Pencil className="h-4 w-4" />
       </button>
       <button
         type="button"
         onClick={onDelete}
-        className="rounded-xl border border-line/80 p-2 text-muted transition hover:border-danger/30 hover:text-danger"
+        className="pressable rounded-[14px] bg-surface-strong/60 p-2 text-muted transition hover:bg-surface hover:text-danger"
       >
         <Trash2 className="h-4 w-4" />
       </button>
@@ -70,9 +70,9 @@ export function TransactionTable({
 }) {
   return (
     <>
-      <div className="hidden max-h-[68vh] overflow-auto rounded-[24px] border border-line/80 md:block">
-        <table className="min-w-full divide-y divide-line/80">
-          <thead className="sticky top-0 z-10 bg-surface-strong/95 backdrop-blur">
+      <div className="hidden max-h-[68vh] overflow-auto rounded-[24px] bg-surface-strong/35 md:block">
+        <table className="min-w-full divide-y divide-line/50">
+          <thead className="sticky top-0 z-10 bg-surface/92 backdrop-blur">
             <tr>
               {[
                 { id: "date", label: "Date" },
@@ -80,7 +80,7 @@ export function TransactionTable({
                 { id: "category", label: "Category" },
                 { id: "amount", label: "Amount" },
               ].map((column) => (
-                <th key={column.id} className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-[0.2em] text-muted">
+                <th key={column.id} className="px-4 py-4 text-left text-sm font-medium text-muted">
                   <button
                     type="button"
                     onClick={() => onSort(column.id)}
@@ -91,18 +91,18 @@ export function TransactionTable({
                   </button>
                 </th>
               ))}
-              <th className="px-4 py-4 text-right text-xs font-semibold uppercase tracking-[0.2em] text-muted">Type</th>
-              <th className="px-4 py-4 text-right text-xs font-semibold uppercase tracking-[0.2em] text-muted">Actions</th>
+              <th className="px-4 py-4 text-right text-sm font-medium text-muted">Type</th>
+              <th className="px-4 py-4 text-right text-sm font-medium text-muted">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-line/70 bg-surface/75">
+          <tbody className="divide-y divide-line/45 bg-surface/70">
             {transactions.map((transaction) => {
               const badge =
                 CATEGORY_META[transaction.category]?.badge ??
-                "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+                "bg-surface-strong/90 text-ink";
 
               return (
-                <tr key={transaction.id} className="group transition hover:bg-surface-strong/90">
+                <tr key={transaction.id} className="group odd:bg-surface/70 even:bg-surface-strong/30 transition hover:bg-surface">
                   <td className="whitespace-nowrap px-4 py-4 text-sm font-medium text-ink">
                     {formatLongDate(transaction.date)}
                   </td>
@@ -117,8 +117,8 @@ export function TransactionTable({
                     {formatCurrency(transaction.amount)}
                   </td>
                   <td className="px-4 py-4 text-right">
-                    <span className={cn("rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]", transaction.type === "income" ? "bg-accent-soft/70 text-accent" : "bg-danger-soft/80 text-danger")}>
-                      {transaction.type}
+                    <span className={cn("rounded-full px-3 py-1 text-xs font-semibold", transaction.type === "income" ? "bg-accent-soft/60 text-accent" : "bg-danger-soft/70 text-danger")}>
+                      {transaction.type === "income" ? "In" : "Out"}
                     </span>
                   </td>
                   <td className="px-4 py-4">
@@ -126,7 +126,7 @@ export function TransactionTable({
                       canManage={canManage}
                       onEdit={() => onEdit(transaction)}
                       onDelete={() => onDelete(transaction)}
-                      reason="Viewer mode keeps transaction actions read-only."
+                      reason="Switch to edit mode if you want to change this row."
                     />
                   </td>
                 </tr>
@@ -137,20 +137,20 @@ export function TransactionTable({
       </div>
 
       <div className="grid gap-3 md:hidden">
-        {transactions.map((transaction) => {
+        {transactions.map((transaction, index) => {
           const badge =
             CATEGORY_META[transaction.category]?.badge ??
-            "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+            "bg-surface-strong/90 text-ink";
 
           return (
-            <div key={transaction.id} className="rounded-[24px] border border-line/80 bg-surface/80 p-4 transition hover:-translate-y-0.5 hover:shadow-panel">
+            <div key={transaction.id} className={cn("rounded-[22px] p-4 transition hover:-translate-y-0.5 hover:shadow-panel", index % 2 === 0 ? "bg-surface-strong/45" : "bg-surface-strong/6") }>
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-sm font-semibold text-ink">{transaction.description}</p>
                   <p className="mt-1 text-sm text-muted">{formatLongDate(transaction.date)}</p>
                 </div>
-                <span className={cn("rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]", transaction.type === "income" ? "bg-accent-soft/70 text-accent" : "bg-danger-soft/80 text-danger")}>
-                  {transaction.type}
+                <span className={cn("rounded-full px-3 py-1 text-xs font-semibold", transaction.type === "income" ? "bg-accent-soft/60 text-accent" : "bg-danger-soft/70 text-danger")}>
+                  {transaction.type === "income" ? "In" : "Out"}
                 </span>
               </div>
 
@@ -169,7 +169,7 @@ export function TransactionTable({
                   canManage={canManage}
                   onEdit={() => onEdit(transaction)}
                   onDelete={() => onDelete(transaction)}
-                  reason="Viewer mode keeps transaction actions read-only."
+                  reason="Switch to edit mode if you want to change this row."
                 />
               </div>
             </div>
@@ -179,4 +179,3 @@ export function TransactionTable({
     </>
   );
 }
-

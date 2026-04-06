@@ -28,14 +28,15 @@ export const useFinanceStore = create(
       filters: defaultFilters,
       selectedRole: "admin",
       dateRange: "30d",
+      chartMode: "net",
       activeView: "dashboard",
-      darkMode: false,
       dashboardMode: "savings",
       lastUpdatedAt: new Date().toISOString(),
       hydrated: false,
       setHydrated: (hydrated) => set({ hydrated }),
       setRole: (selectedRole) => set({ selectedRole }),
       setDateRange: (dateRange) => set({ dateRange }),
+      setChartMode: (chartMode) => set({ chartMode }),
       setActiveView: (activeView) => set({ activeView }),
       setDashboardMode: (dashboardMode) => set({ dashboardMode }),
       setSearch: (search) =>
@@ -85,7 +86,6 @@ export const useFinanceStore = create(
           },
         })),
       clearFilters: () => set({ filters: defaultFilters }),
-      toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
       addTransaction: (transaction) =>
         set((state) =>
           withUpdatedAt({
@@ -117,8 +117,8 @@ export const useFinanceStore = create(
         filters: state.filters,
         selectedRole: state.selectedRole,
         dateRange: state.dateRange,
+        chartMode: state.chartMode,
         activeView: state.activeView,
-        darkMode: state.darkMode,
         dashboardMode: state.dashboardMode,
         lastUpdatedAt: state.lastUpdatedAt,
       }),

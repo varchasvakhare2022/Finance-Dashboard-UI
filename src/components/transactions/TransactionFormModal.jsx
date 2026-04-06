@@ -49,20 +49,20 @@ export function TransactionFormModal({ open, transaction, categories, onClose, o
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4 py-8 backdrop-blur-sm">
-      <div className="w-full max-w-2xl rounded-[28px] border border-line/80 bg-surface p-6 shadow-glow">
+      <div className="w-full max-w-2xl rounded-[28px] border border-line/50 bg-surface p-6 shadow-panel">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted">
-              {transaction ? "Edit transaction" : "Add transaction"}
+            <p className="text-sm font-medium text-muted">
+              {transaction ? "Editing a transaction" : "Add a transaction"}
             </p>
-            <h3 className="mt-2 font-display text-2xl font-bold text-ink">
-              {transaction ? "Update ledger entry" : "Capture a new ledger entry"}
+            <h3 className="mt-2 font-display text-2xl font-bold tracking-tight text-ink">
+              {transaction ? "Update the details" : "Add something new to the ledger"}
             </h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-2xl border border-line/80 p-3 text-muted transition hover:text-ink"
+            className="pressable rounded-2xl bg-surface-strong/60 p-3 text-muted transition hover:bg-surface hover:text-ink"
           >
             <X className="h-4 w-4" />
           </button>
@@ -74,8 +74,8 @@ export function TransactionFormModal({ open, transaction, categories, onClose, o
             <input
               value={form.description}
               onChange={(event) => handleChange("description", event.target.value)}
-              placeholder="Quarterly bonus, rent payment, travel booking..."
-              className="w-full rounded-2xl border border-line/80 bg-surface-strong/70 px-4 py-3 text-sm text-ink outline-none transition focus:border-accent/40"
+              placeholder="Rent, salary, groceries, train tickets..."
+              className="w-full rounded-[18px] border border-line/45 bg-surface-strong/55 px-4 py-3 text-sm text-ink outline-none transition focus:border-accent/30"
             />
           </label>
 
@@ -85,7 +85,7 @@ export function TransactionFormModal({ open, transaction, categories, onClose, o
               type="date"
               value={form.date}
               onChange={(event) => handleChange("date", event.target.value)}
-              className="w-full rounded-2xl border border-line/80 bg-surface-strong/70 px-4 py-3 text-sm text-ink outline-none transition focus:border-accent/40"
+              className="w-full rounded-[18px] border border-line/45 bg-surface-strong/55 px-4 py-3 text-sm text-ink outline-none transition focus:border-accent/30"
             />
           </label>
 
@@ -98,7 +98,7 @@ export function TransactionFormModal({ open, transaction, categories, onClose, o
               value={form.amount}
               onChange={(event) => handleChange("amount", event.target.value)}
               placeholder="0"
-              className="w-full rounded-2xl border border-line/80 bg-surface-strong/70 px-4 py-3 text-sm text-ink outline-none transition focus:border-accent/40"
+              className="w-full rounded-[18px] border border-line/45 bg-surface-strong/55 px-4 py-3 text-sm text-ink outline-none transition focus:border-accent/30"
             />
           </label>
 
@@ -107,7 +107,7 @@ export function TransactionFormModal({ open, transaction, categories, onClose, o
             <select
               value={form.category}
               onChange={(event) => handleChange("category", event.target.value)}
-              className="w-full rounded-2xl border border-line/80 bg-surface-strong/70 px-4 py-3 text-sm text-ink outline-none transition focus:border-accent/40"
+              className="w-full rounded-[18px] border border-line/45 bg-surface-strong/55 px-4 py-3 text-sm text-ink outline-none transition focus:border-accent/30"
             >
               {categories.map((category) => (
                 <option key={category} value={category}>
@@ -122,7 +122,7 @@ export function TransactionFormModal({ open, transaction, categories, onClose, o
             <select
               value={form.type}
               onChange={(event) => handleChange("type", event.target.value)}
-              className="w-full rounded-2xl border border-line/80 bg-surface-strong/70 px-4 py-3 text-sm text-ink outline-none transition focus:border-accent/40"
+              className="w-full rounded-[18px] border border-line/45 bg-surface-strong/55 px-4 py-3 text-sm text-ink outline-none transition focus:border-accent/30"
             >
               <option value="income">Income</option>
               <option value="expense">Expense</option>
@@ -133,15 +133,15 @@ export function TransactionFormModal({ open, transaction, categories, onClose, o
             <button
               type="button"
               onClick={onClose}
-              className="rounded-2xl border border-line/80 px-5 py-3 text-sm font-semibold text-ink transition hover:border-accent/40"
+              className="pressable rounded-[18px] bg-surface-strong/55 px-5 py-3 text-sm font-semibold text-ink transition hover:bg-surface"
             >
-              Cancel
+              Never mind
             </button>
             <button
               type="submit"
-              className="rounded-2xl bg-ink px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 dark:bg-white dark:text-slate-900"
+              className="pressable rounded-[18px] bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:opacity-95"
             >
-              {transaction ? "Save changes" : "Add transaction"}
+              {transaction ? "Save changes" : "Save transaction"}
             </button>
           </div>
         </form>
