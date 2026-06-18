@@ -20,6 +20,22 @@
   --danger-soft: 127 29 29;
 }
 
+.light-theme {
+  --bg: 241 245 249;
+  --canvas: 255 255 255;
+  --surface: 248 250 252;
+  --surface-strong: 237 242 247;
+  --ink: 10 14 26;
+  --muted: 71 85 105;
+  --line: 203 213 225;
+  --accent: 20 184 166;
+  --accent-soft: 16 185 129;
+  --warning: 251 191 36;
+  --warning-soft: 252 211 77;
+  --danger: 220 38 38;
+  --danger-soft: 248 113 113;
+}
+
 ::selection {
   @apply bg-accent/30 text-white;
 }
