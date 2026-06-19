@@ -10,7 +10,7 @@ export function Header() {
   };
 
   return (
-    <header className="flex items-center justify-between p-6 bg-surface shadow-md">
+    <header className="flex items-center justify-between p-6 bg-accent shadow-md">
       <div className="flex items-center gap-4">
         <img src="/logo.png" alt="Logo" className="h-10 w-10" />
         <h1 className="text-2xl font-bold text-ink">My Website</h1>
