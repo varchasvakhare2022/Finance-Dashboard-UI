@@ -39,7 +39,7 @@ export function FinancialHealthCard({ health, dashboardMode, healthDelta, onOpen
   return (
     <Surface strong className="relative flex h-full flex-col overflow-hidden px-5 py-5 animate-fade-up lg:px-7 lg:py-7">
       {/* Decorative Aurora Backdrop */}
-      <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-accent/5 blur-[80px]" />
+      <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-accent/10 blur-[80px]" />
 
       <div className="relative mb-8 flex items-start justify-between gap-6">
         <div className="max-w-[20rem]">

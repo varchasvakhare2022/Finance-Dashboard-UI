@@ -89,7 +89,7 @@ export function BalanceChart({
         </div>
 
         <div className="space-y-3 lg:text-right">
-          <div className="inline-flex rounded-full bg-accent-soft/55 px-4 py-2 text-sm font-semibold text-accent">
+          <div className="inline-flex rounded-full bg-accent-soft/70 px-4 py-2 text-sm font-semibold text-accent">
             Net this window {formatSignedCurrency(netFlow, true)}
           </div>
           <div className="flex flex-col items-start gap-2 lg:items-end">

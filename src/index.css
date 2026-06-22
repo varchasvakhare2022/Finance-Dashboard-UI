@@ -5,15 +5,15 @@
 @tailwind utilities;
 
 :root {
-  --bg: 255 255 255;
-  --canvas: 245 245 245;
-  --surface: 255 255 255;
-  --surface-strong: 230 230 230;
+  --bg: 255 235 238;
+  --canvas: 255 205 210;
+  --surface: 255 235 238;
+  --surface-strong: 239 154 154;
   --ink: 30 30 30;
   --muted: 120 120 120;
   --line: 200 200 200;
-  --accent: 220 38 38; /* Red */
-  --accent-soft: 239 68 68; /* Soft Red */
+  --accent: 198 40 40; /* Darker Red */
+  --accent-soft: 229 115 115; /* Softer Red */
   --gold: 255 215 0; /* Gold */
   --warning: 255 149 0;
   --warning-soft: 204 102 0;

@@ -29,7 +29,7 @@ export function CategoryBreakdown({ categories, selectedCategory, onSelectCatego
   if (!categories.length) {
     return (
       <Surface className="flex h-full flex-col items-center justify-center px-5 py-6 text-center animate-fade-up">
-        <div className="rounded-full bg-accent-soft/60 px-4 py-2 text-sm font-semibold text-accent">
+        <div className="rounded-full bg-accent-soft/70 px-4 py-2 text-sm font-semibold text-accent">
           Nothing to show yet
         </div>
         <h3 className="mt-4 font-display text-2xl font-bold text-ink">No spending in this range</h3>

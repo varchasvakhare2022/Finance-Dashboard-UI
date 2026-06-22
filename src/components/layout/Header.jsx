@@ -10,7 +10,7 @@ export function Header() {
   };
 
   return (
-    <header className="flex items-center justify-between p-4 bg-gradient-to-r from-red-500 to-red-700 shadow-xl">
+    <header className="flex items-center justify-between p-4 bg-gradient-to-r from-accent to-accent-soft shadow-xl">
       <div className="flex items-center gap-4">
         <img src="/logo.png" alt="Logo" className="h-12 w-12" />
         <h1 className="text-2xl font-bold text-white">Northstar Finance</h1>

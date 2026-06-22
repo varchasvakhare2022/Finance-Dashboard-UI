@@ -20,7 +20,7 @@ export function BalanceHeroCard({
     <Surface strong className="relative flex h-full flex-col overflow-hidden px-5 py-5 animate-fade-up lg:px-8 lg:py-8 lg:min-h-[460px]">
       {/* Premium SVG Grid Pattern */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: `radial-gradient(circle at 1.5px 1.5px, hsl(var(--muted)) 1px, transparent 0)`, backgroundSize: '24px 24px' }} />
-      <div className="absolute inset-0 bg-gradient-to-br from-accent-soft/15 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-accent-soft/30 via-transparent to-transparent pointer-events-none" />
 
       <div className="relative flex flex-col h-full">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(280px,0.9fr)] lg:items-start flex-1">

@@ -29,7 +29,7 @@ export function SummaryCard({ metric }) {
           <AnimatedNumber value={metric.value} formatter={(value) => formatCurrency(Math.round(value))} />
         </p>
         <div
-          className={`mt-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ${positiveTrend ? "bg-accent-soft/65 text-accent" : "bg-danger-soft/70 text-danger"}`}
+          className={`mt-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ${positiveTrend ? "bg-accent-soft/80 text-accent" : "bg-danger-soft/70 text-danger"}`}
         >
           <TrendIcon className="h-3.5 w-3.5" />
           {formatPercent(metric.trend.percentage)}

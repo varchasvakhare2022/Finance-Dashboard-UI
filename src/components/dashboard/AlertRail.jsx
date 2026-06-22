@@ -21,8 +21,8 @@ const ICONS = {
 
 const TONES = {
   positive: {
-    card: "border-line/50 bg-surface/72",
-    icon: "bg-accent-soft/70 text-accent",
+    card: "border-accent/50 bg-accent-soft/30",
+    icon: "bg-accent-soft/80 text-accent",
     button: "border-line/55 text-ink hover:border-accent/25 hover:bg-surface",
   },
   warning: {
