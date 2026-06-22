@@ -12,8 +12,8 @@
   --ink: 30 30 30;
   --muted: 120 120 120;
   --line: 200 200 200;
-  --accent: 255 0 0; // Changed to red
-  --accent-soft: 204 0 0; // Changed to a softer red
+  --accent: 255 0 0;
+  --accent-soft: 204 0 0;
   --warning: 255 149 0;
   --warning-soft: 204 102 0;
   --danger: 255 59 48;
