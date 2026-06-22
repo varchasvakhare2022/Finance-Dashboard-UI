@@ -25,6 +25,7 @@ export default {
       boxShadow: {
         glow: "0 18px 40px rgba(15, 23, 42, 0.1)",
         panel: "0 10px 24px rgba(15, 23, 42, 0.08)",
+        lg: "0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05)",
       },
       keyframes: {
         "fade-up": {
