@@ -43,7 +43,7 @@ export default function App() {
   const isLoading = !hydrated || booting;
 
   return (
-    <div className="flex min-h-screen flex-col overflow-x-hidden">
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-gradient-to-r from-green-500 to-green-700 text-gold-600">
       <Header />
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-12 lg:px-8">

@@ -12,8 +12,9 @@
   --ink: 30 30 30;
   --muted: 120 120 120;
   --line: 200 200 200;
-  --accent: 220 38 38; /* Red */
-  --accent-soft: 185 28 28; /* Dark Red */
+  --accent: 34 139 34; /* Green */
+  --accent-soft: 34 139 34; /* Dark Green */
+  --gold: 255 215 0; /* Gold */
   --warning: 255 149 0;
   --warning-soft: 204 102 0;
   --danger: 255 59 48;
