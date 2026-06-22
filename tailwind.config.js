@@ -11,8 +11,8 @@ export default {
         ink: "rgb(var(--ink) / <alpha-value>)",
         muted: "rgb(var(--muted) / <alpha-value>)",
         line: "rgb(var(--line) / <alpha-value>)",
-        accent: "rgb(var(--accent) / <alpha-value>)",
-        "accent-soft": "rgb(var(--accent-soft) / <alpha-value>)",
+        accent: "rgb(255, 0, 0 / <alpha-value>)", // Changed to red
+        "accent-soft": "rgb(204, 0, 0 / <alpha-value>)", // Changed to a softer red
         danger: "rgb(var(--danger) / <alpha-value>)",
         "danger-soft": "rgb(var(--danger-soft) / <alpha-value>)",
         warning: "rgb(var(--warning) / <alpha-value>)",
