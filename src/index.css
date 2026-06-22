@@ -12,8 +12,8 @@
   --ink: 30 30 30;
   --muted: 120 120 120;
   --line: 200 200 200;
-  --accent: 59 130 246; /* Blue */
-  --accent-soft: 99 102 241; /* Purple */
+  --accent: 220 38 38; /* Red */
+  --accent-soft: 185 28 28; /* Dark Red */
   --warning: 255 149 0;
   --warning-soft: 204 102 0;
   --danger: 255 59 48;
