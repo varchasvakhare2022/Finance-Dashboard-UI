@@ -21,6 +21,7 @@ export function Header() {
         <a href="#" className="text-sm font-medium text-muted hover:text-ink transition">Services</a>
         <a href="#" className="text-sm font-medium text-muted hover:text-ink transition">Contact</a>
       </nav>
+      <div className="flex-1"></div>
       <button
         onClick={toggleTheme}
         className="px-4 py-2 text-sm font-medium text-ink bg-accent rounded-lg hover:bg-accent-soft transition"
