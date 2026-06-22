@@ -11,8 +11,8 @@ export default {
         ink: "rgb(var(--ink) / <alpha-value>)",
         muted: "rgb(var(--muted) / <alpha-value>)",
         line: "rgb(var(--line) / <alpha-value>)",
-        accent: "rgb(59, 130, 246 / <alpha-value>)", // Blue
-        "accent-soft": "rgb(99, 102, 241 / <alpha-value>)", // Purple
+        accent: "rgb(220, 38, 38 / <alpha-value>)", // Red
+        "accent-soft": "rgb(239, 68, 68 / <alpha-value>)", // Soft Red
         danger: "rgb(var(--danger) / <alpha-value>)",
         "danger-soft": "rgb(var(--danger-soft) / <alpha-value>)",
         warning: "rgb(var(--warning) / <alpha-value>)",
