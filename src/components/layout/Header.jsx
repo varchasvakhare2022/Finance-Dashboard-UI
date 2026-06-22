@@ -16,7 +16,7 @@ export function Header() {
         <h1 className="text-2xl font-semibold text-white tracking-wide">Northstar Finance</h1>
       </div>
       <nav className="hidden md:flex gap-8">
-        <a href="#" className="text-sm font-semibold text-white hover:text-yellow-300 transition duration-300 ease-in-out">house</a>
+        <a href="#" className="text-sm font-semibold text-white hover:text-yellow-300 transition duration-300 ease-in-out">home</a>
         <a href="#" className="text-sm font-semibold text-white hover:text-yellow-300 transition duration-300 ease-in-out">About</a>
         <a href="#" className="text-sm font-semibold text-white hover:text-yellow-300 transition duration-300 ease-in-out">Services</a>
         <a href="#" className="text-sm font-semibold text-white hover:text-yellow-300 transition duration-300 ease-in-out">Contact</a>
